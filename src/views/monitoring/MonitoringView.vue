@@ -1,0 +1,153 @@
+<script setup lang="ts">
+import { ref, onMounted, onUnmounted } from 'vue'
+import { useFiltersStore } from '@/stores/filters.store'
+import { readingsService } from '@/services/readings.service'
+import { geoService } from '@/services/geo.service'
+import type { WarehouseReadingSummary } from '@/types/reading.types'
+import type { Warehouse } from '@/types/geo.types'
+import ThresholdDot from '@/components/common/ThresholdDot.vue'
+import ReadingChart from '@/components/charts/ReadingChart.vue'
+import { storeToRefs } from 'pinia'
+
+const filtersStore = useFiltersStore()
+const { warehouseId } = storeToRefs(filtersStore)
+
+const warehouses = ref<Warehouse[]>([])
+const selectedWarehouseId = ref<number | undefined>(undefined)
+const summary = ref<WarehouseReadingSummary | null>(null)
+const selectedZoneId = ref<number | undefined>(undefined)
+const loading = ref(false)
+let pollTimer: ReturnType<typeof setInterval> | null = null
+
+async function loadWarehouses() {
+  warehouses.value = await geoService.getWarehouses()
+  if (warehouseId.value) selectedWarehouseId.value = warehouseId.value
+  else if (warehouses.value.length) selectedWarehouseId.value = warehouses.value[0].id
+  if (selectedWarehouseId.value) loadSummary()
+}
+
+async function loadSummary() {
+  if (!selectedWarehouseId.value) return
+  loading.value = true
+  try {
+    summary.value = await readingsService.getWarehouseSummary(selectedWarehouseId.value)
+  } finally {
+    loading.value = false
+  }
+}
+
+onMounted(() => {
+  loadWarehouses()
+  pollTimer = setInterval(loadSummary, 30_000)
+})
+
+onUnmounted(() => {
+  if (pollTimer) clearInterval(pollTimer)
+})
+
+function selectWarehouse(id: number) {
+  selectedWarehouseId.value = id
+  selectedZoneId.value = undefined
+  summary.value = null
+  loadSummary()
+}
+
+function selectZone(id: number) {
+  selectedZoneId.value = selectedZoneId.value === id ? undefined : id
+}
+</script>
+
+<template>
+  <div class="page">
+    <h2>Monitoring temps réel</h2>
+    <p class="subtitle">Actualisation automatique toutes les 30 secondes</p>
+
+    <!-- Sélecteur entrepôt -->
+    <div class="warehouse-tabs">
+      <button
+        v-for="w in warehouses"
+        :key="w.id"
+        class="tab"
+        :class="{ 'tab--active': selectedWarehouseId === w.id }"
+        @click="selectWarehouse(w.id)"
+      >
+        {{ w.name }}
+      </button>
+    </div>
+
+    <div v-if="loading && !summary" class="loading">Chargement…</div>
+
+    <template v-else-if="summary">
+      <!-- Tableau des zones -->
+      <div class="zones-grid">
+        <div
+          v-for="zone in summary.zones"
+          :key="zone.zone_id"
+          class="zone-card"
+          :class="{
+            'zone-card--ok': zone.threshold_status === 'ok',
+            'zone-card--warn': zone.threshold_status === 'warn',
+            'zone-card--alert': zone.threshold_status === 'alert',
+            'zone-card--selected': selectedZoneId === zone.zone_id,
+          }"
+          @click="selectZone(zone.zone_id)"
+        >
+          <div class="zone-name">{{ zone.zone_name }}</div>
+          <ThresholdDot :status="zone.threshold_status" />
+          <div class="zone-values">
+            <span>🌡 {{ zone.temperature.toFixed(1) }}°C</span>
+            <span>💧 {{ zone.humidity.toFixed(0) }}%</span>
+          </div>
+          <div class="zone-date">{{ new Date(zone.recorded_at).toLocaleTimeString('fr-FR') }}</div>
+        </div>
+      </div>
+
+      <!-- Courbe de la zone sélectionnée -->
+      <div v-if="selectedZoneId" class="chart-section">
+        <h3>Historique — Zone sélectionnée</h3>
+        <ReadingChart :zone-id="selectedZoneId" />
+      </div>
+      <p v-else class="chart-hint">Cliquez sur une zone pour afficher son historique</p>
+    </template>
+  </div>
+</template>
+
+<style scoped>
+.page { padding: 2rem; max-width: 1200px; margin: 0 auto; }
+h2 { margin: 0 0 0.25rem; }
+.subtitle { color: #6b7280; font-size: 0.85rem; margin: 0 0 1.5rem; }
+.warehouse-tabs { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
+.tab {
+  padding: 8px 18px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: white;
+  cursor: pointer;
+  font-size: 0.875rem;
+}
+.tab--active { background: #1a2e1a; color: white; border-color: #1a2e1a; }
+.loading { text-align: center; padding: 2rem; color: #6b7280; }
+.zones-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+.zone-card {
+  border: 2px solid transparent;
+  border-radius: 12px;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  cursor: pointer;
+  transition: border-color 0.15s, transform 0.1s;
+  background: white;
+}
+.zone-card:hover { transform: translateY(-2px); }
+.zone-card--ok   { border-color: #86efac; background: #f0fdf4; }
+.zone-card--warn { border-color: #fcd34d; background: #fffbeb; }
+.zone-card--alert { border-color: #fca5a5; background: #fef2f2; }
+.zone-card--selected { outline: 3px solid #15803d; }
+.zone-name { font-weight: 600; font-size: 0.9rem; }
+.zone-values { display: flex; gap: 0.75rem; font-size: 0.875rem; }
+.zone-date { font-size: 0.75rem; color: #9ca3af; }
+.chart-section { background: white; border: 1px solid #e5e7eb; border-radius: 12px; padding: 1.25rem; }
+h3 { margin: 0 0 1rem; font-size: 0.95rem; }
+.chart-hint { text-align: center; color: #9ca3af; font-size: 0.875rem; margin-top: 1rem; }
+</style>
