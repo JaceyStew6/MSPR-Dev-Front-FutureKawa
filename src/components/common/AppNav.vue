@@ -17,7 +17,7 @@ async function handleLogout() {
 <template>
   <nav class="nav">
     <div class="nav-brand" v-if="role === 'quality'">
-      <RouterLink to="/quality" class="brand-link">🌿 Qualité</RouterLink>
+      <RouterLink to="/quality" class="brand-link">🌿 FutureKawa</RouterLink>
     </div>
     <div class="nav-brand" v-if="role === 'farm_manager'">
       <RouterLink to="/farm" class="brand-link">🌿 FutureKawa</RouterLink>
@@ -26,10 +26,10 @@ async function handleLogout() {
       <RouterLink to="/home" class="brand-link">🌿 FutureKawa</RouterLink>
     </div>
     <div class="nav-brand" v-if="role === 'supply_chain'">
-      <RouterLink to="/quality" class="brand-link">🌿 FutureKawa</RouterLink>
+      <RouterLink to="/supply-chain" class="brand-link">🌿 FutureKawa</RouterLink>
     </div>
     <div class="nav-brand" v-if="role === 'hq'">
-      <RouterLink to="/quality" class="brand-link">🌿 FutureKawa</RouterLink>
+      <RouterLink to="/hq" class="brand-link">🌿 FutureKawa</RouterLink>
     </div>
 
     <ul class="nav-links">
@@ -43,28 +43,8 @@ async function handleLogout() {
         </li>
       </template>
 
-      <!-- Équipe Qualité -->
-      <template v-if="role === 'quality'">
-        <li>
-          <RouterLink to="/monitoring">Monitoring</RouterLink>
-        </li>
-      </template>
-
-      <!-- Supply Chain -->
-      <template v-if="role === 'supply_chain'">
-        <li>
-          <RouterLink to="/supply-chain">Vue consolidée</RouterLink>
-        </li>
-      </template>
-
       <!-- HQ / Siège -->
       <template v-if="role === 'hq'">
-        <li>
-          <RouterLink to="/hq">Reporting</RouterLink>
-        </li>
-        <li>
-          <RouterLink to="/monitoring">Monitoring</RouterLink>
-        </li>
         <li>
           <RouterLink to="/quality">Qualité</RouterLink>
         </li>
@@ -73,15 +53,14 @@ async function handleLogout() {
         </li>
       </template>
       <li>
-        <RouterLink to="/lots">Lots</RouterLink>
-      </li>
-      <li>
-        <RouterLink to="/alerts">Alertes</RouterLink>
+        <RouterLink to="/lots" v-if="role === 'quality' || role === 'warehouse_manager' || role === 'supply_chain'">
+          Lots
+        </RouterLink>
       </li>
     </ul>
 
     <div class="nav-right">
-      <AlertBadge />
+      <AlertBadge v-if="role === 'warehouse_manager' || role === 'farm_manager'" />
       <span class="user-info">{{ user?.name }} · <em>{{ user?.role }}</em></span>
       <button class="btn-logout" @click="handleLogout">Déconnexion</button>
     </div>
