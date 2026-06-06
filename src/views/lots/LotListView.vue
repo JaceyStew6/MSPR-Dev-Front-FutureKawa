@@ -58,7 +58,7 @@ watch(page, fetchLots)
     <div class="filters-bar">
       <CascadeFilter />
       <select v-model="statusFilter" class="status-filter">
-        <option value="">— Tous les statuts —</option>
+        <option value="">- Tous les statuts -</option>
         <option value="pending">En attente</option>
         <option value="stored">Stocké</option>
         <option value="compliant">Conforme</option>

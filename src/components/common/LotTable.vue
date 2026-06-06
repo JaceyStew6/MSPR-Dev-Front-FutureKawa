@@ -9,7 +9,7 @@ defineProps<{
 }>()
 
 function formatDate(d: string | undefined) {
-  if (!d) return '—'
+  if (!d) return '-'
   return new Date(d).toLocaleDateString('fr-FR')
 }
 </script>
@@ -36,7 +36,7 @@ function formatDate(d: string | undefined) {
           <td class="batch">{{ lot.batch_number }}</td>
           <td>{{ lot.country_name ?? lot.country_id }}</td>
           <td>{{ lot.farm_name ?? lot.farm_id }}</td>
-          <td>{{ lot.warehouse_name ?? '—' }}<span v-if="lot.zone_name"> / {{ lot.zone_name }}</span></td>
+          <td>{{ lot.warehouse_name ?? '-' }}<span v-if="lot.zone_name"> / {{ lot.zone_name }}</span></td>
           <td>{{ formatDate(lot.production_date) }}</td>
           <td>{{ formatDate(lot.storage_date) }}</td>
           <td><StatusBadge :status="lot.status" /></td>
@@ -46,7 +46,7 @@ function formatDate(d: string | undefined) {
               {{ lot.latest_reading.temperature.toFixed(1) }}°C
               {{ lot.latest_reading.humidity.toFixed(0) }}%
             </template>
-            <span v-else class="no-data">—</span>
+            <span v-else class="no-data">-</span>
           </td>
           <td>
             <RouterLink :to="`/lots/${lot.id}`" class="btn-detail">Détail</RouterLink>

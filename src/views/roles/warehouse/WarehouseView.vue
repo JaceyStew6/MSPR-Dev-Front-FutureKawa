@@ -100,7 +100,7 @@ onMounted(() => { fetchLots(); loadZones() })
         <h3>📥 Entrée en stock</h3>
         <input v-model="stockInLotId" placeholder="ID ou N° lot" />
         <select v-model="stockInZoneId">
-          <option :value="undefined">— Zone —</option>
+          <option :value="undefined">- Zone -</option>
           <option v-for="z in zones" :key="z.id" :value="z.id">{{ z.name }}</option>
         </select>
         <button @click="doStockIn" :disabled="!stockInLotId || !stockInZoneId">Enregistrer l'entrée</button>
@@ -110,7 +110,7 @@ onMounted(() => { fetchLots(); loadZones() })
       <div class="action-card">
         <h3>📤 Sortie de stock</h3>
         <select v-model="stockOutLotId">
-          <option :value="null">— Sélectionner lot —</option>
+          <option :value="null">- Sélectionner lot -</option>
           <option v-for="l in lots" :key="l.id" :value="l.id">{{ l.batch_number }}</option>
         </select>
         <input v-model="stockOutReason" placeholder="Motif" />
@@ -121,11 +121,11 @@ onMounted(() => { fetchLots(); loadZones() })
       <div class="action-card">
         <h3>🔄 Déplacer un lot</h3>
         <select v-model="transferLotId">
-          <option :value="null">— Sélectionner lot —</option>
+          <option :value="null">- Sélectionner lot -</option>
           <option v-for="l in lots" :key="l.id" :value="l.id">{{ l.batch_number }}</option>
         </select>
         <select v-model="transferZoneId">
-          <option :value="undefined">— Nouvelle zone —</option>
+          <option :value="undefined">- Nouvelle zone -</option>
           <option v-for="z in zones" :key="z.id" :value="z.id">{{ z.name }}</option>
         </select>
         <button @click="doTransfer" :disabled="!transferLotId || !transferZoneId">Déplacer</button>
@@ -135,7 +135,7 @@ onMounted(() => { fetchLots(); loadZones() })
       <div class="action-card">
         <h3>✏️ Mettre à jour statut</h3>
         <select v-model="statusLotId">
-          <option :value="null">— Sélectionner lot —</option>
+          <option :value="null">- Sélectionner lot -</option>
           <option v-for="l in lots" :key="l.id" :value="l.id">{{ l.batch_number }}</option>
         </select>
         <select v-model="newStatus">
@@ -151,7 +151,7 @@ onMounted(() => { fetchLots(); loadZones() })
 
     <!-- Liste lots triée FIFO -->
     <div class="section">
-      <h3>Lots en stock <span class="fifo-hint">(tri FIFO — plus anciens en premier)</span></h3>
+      <h3>Lots en stock <span class="fifo-hint">(tri FIFO - plus anciens en premier)</span></h3>
       <LotTable :lots="lots" :loading="loading" />
     </div>
   </div>

@@ -104,7 +104,7 @@ function selectZone(id: number) {
 
       <!-- Courbe de la zone sélectionnée -->
       <div v-if="selectedZoneId" class="chart-section">
-        <h3>Historique — Zone sélectionnée</h3>
+        <h3>Historique - Zone sélectionnée</h3>
         <ReadingChart :zone-id="selectedZoneId" />
       </div>
       <p v-else class="chart-hint">Cliquez sur une zone pour afficher son historique</p>

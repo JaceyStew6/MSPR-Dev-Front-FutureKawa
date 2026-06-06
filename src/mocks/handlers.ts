@@ -1,4 +1,4 @@
-// Intercepteur fetch mock — mappe chaque endpoint vers les données mock
+// Intercepteur fetch mock - mappe chaque endpoint vers les données mock
 // Activé uniquement quand VITE_MOCK=true
 
 import {

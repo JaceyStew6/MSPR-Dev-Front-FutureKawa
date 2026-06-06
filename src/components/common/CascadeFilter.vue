@@ -42,7 +42,7 @@ watch(warehouseId, async (id) => {
       @change="filtersStore.setCountry(($event.target as HTMLSelectElement).value ? Number(($event.target as HTMLSelectElement).value) : undefined)"
       :disabled="!!autoFilters.country_id"
     >
-      <option value="">— Pays —</option>
+      <option value="">- Pays -</option>
       <option v-for="c in countries" :key="c.id" :value="c.id">{{ c.name }}</option>
     </select>
 
@@ -51,7 +51,7 @@ watch(warehouseId, async (id) => {
       @change="filtersStore.setFarm(($event.target as HTMLSelectElement).value ? Number(($event.target as HTMLSelectElement).value) : undefined)"
       :disabled="!countryId"
     >
-      <option value="">— Exploitation —</option>
+      <option value="">- Exploitation -</option>
       <option v-for="f in farms" :key="f.id" :value="f.id">{{ f.name }}</option>
     </select>
 
@@ -60,7 +60,7 @@ watch(warehouseId, async (id) => {
       @change="filtersStore.setWarehouse(($event.target as HTMLSelectElement).value ? Number(($event.target as HTMLSelectElement).value) : undefined)"
       :disabled="!countryId"
     >
-      <option value="">— Entrepôt —</option>
+      <option value="">- Entrepôt -</option>
       <option v-for="w in warehouses" :key="w.id" :value="w.id">{{ w.name }}</option>
     </select>
 
@@ -69,7 +69,7 @@ watch(warehouseId, async (id) => {
       @change="filtersStore.setZone(($event.target as HTMLSelectElement).value ? Number(($event.target as HTMLSelectElement).value) : undefined)"
       :disabled="!warehouseId"
     >
-      <option value="">— Zone —</option>
+      <option value="">- Zone -</option>
       <option v-for="z in zones" :key="z.id" :value="z.id">{{ z.name }}</option>
     </select>
 

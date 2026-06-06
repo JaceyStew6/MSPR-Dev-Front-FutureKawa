@@ -61,7 +61,7 @@ async function handleSubmit() {
       <div class="field">
         <label>Zone de stockage *</label>
         <select v-model="zoneId" required>
-          <option :value="undefined">— Sélectionner une zone —</option>
+          <option :value="undefined">- Sélectionner une zone -</option>
           <option v-for="z in zones" :key="z.id" :value="z.id">{{ z.name }}</option>
         </select>
         <small v-if="zones.length === 0" class="hint">Aucune zone disponible pour votre exploitation</small>

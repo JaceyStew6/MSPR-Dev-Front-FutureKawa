@@ -23,7 +23,7 @@ onMounted(async () => {
 })
 
 function formatDate(d: string | undefined) {
-  if (!d) return '—'
+  if (!d) return '-'
   return new Date(d).toLocaleDateString('fr-FR')
 }
 </script>
@@ -49,10 +49,10 @@ function formatDate(d: string | undefined) {
         <div class="info-block">
           <h3>Informations</h3>
           <table class="info-table">
-            <tr><td>Exploitation</td><td>{{ lot.farm_name ?? '—' }}</td></tr>
-            <tr><td>Pays</td><td>{{ lot.country_name ?? '—' }}</td></tr>
-            <tr><td>Entrepôt</td><td>{{ lot.warehouse_name ?? '—' }}</td></tr>
-            <tr><td>Zone</td><td>{{ lot.zone_name ?? '—' }}</td></tr>
+            <tr><td>Exploitation</td><td>{{ lot.farm_name ?? '-' }}</td></tr>
+            <tr><td>Pays</td><td>{{ lot.country_name ?? '-' }}</td></tr>
+            <tr><td>Entrepôt</td><td>{{ lot.warehouse_name ?? '-' }}</td></tr>
+            <tr><td>Zone</td><td>{{ lot.zone_name ?? '-' }}</td></tr>
             <tr><td>Date de production</td><td>{{ formatDate(lot.production_date) }}</td></tr>
             <tr><td>Date de stockage</td><td>{{ formatDate(lot.storage_date) }}</td></tr>
           </table>

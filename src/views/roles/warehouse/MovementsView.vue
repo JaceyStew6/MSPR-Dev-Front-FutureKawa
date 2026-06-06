@@ -58,10 +58,10 @@ const TYPE_LABEL: Record<string, string> = {
           <td>
             <span v-if="m.from_zone_name">{{ m.from_zone_name }} → </span>
             <span v-if="m.to_zone_name">{{ m.to_zone_name }}</span>
-            <span v-if="!m.from_zone_name && !m.to_zone_name">—</span>
+            <span v-if="!m.from_zone_name && !m.to_zone_name">-</span>
           </td>
-          <td>{{ m.reason ?? '—' }}</td>
-          <td>{{ m.performed_by ?? '—' }}</td>
+          <td>{{ m.reason ?? '-' }}</td>
+          <td>{{ m.performed_by ?? '-' }}</td>
         </tr>
         <tr v-if="movements.length === 0">
           <td colspan="6" class="empty">Aucun mouvement</td>

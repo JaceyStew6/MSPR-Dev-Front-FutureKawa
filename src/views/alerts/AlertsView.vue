@@ -60,7 +60,7 @@ const TYPE_LABEL: Record<AlertType, string> = {
         Actives uniquement
       </label>
       <select v-model="typeFilter">
-        <option value="">— Tous types —</option>
+        <option value="">- Tous types -</option>
         <option value="threshold">Hors plage (température/humidité)</option>
         <option value="expiry">Expiration (> 365 jours)</option>
         <option value="fifo">FIFO à risque</option>

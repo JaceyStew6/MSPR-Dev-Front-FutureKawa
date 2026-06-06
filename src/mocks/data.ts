@@ -216,7 +216,7 @@ export const ALERTS = [
     zone_id: 6, zone_name: 'Zone ET-A',
     warehouse_id: 3, warehouse_name: 'Entrepôt Addis-Abeba',
     country_id: 2, country_name: 'Éthiopie',
-    message: 'Lot ET-2024-0001 stocké depuis 390 jours — dépasse la limite de 365 jours.',
+    message: 'Lot ET-2024-0001 stocké depuis 390 jours - dépasse la limite de 365 jours.',
     is_read: false, is_active: true,
     created_at: daysAgo(25),
   },

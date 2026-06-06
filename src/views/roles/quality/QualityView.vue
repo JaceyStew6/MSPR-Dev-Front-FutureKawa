@@ -51,7 +51,7 @@ async function exportTraceability() {
       `${new Date(r.recorded_at).toLocaleString('fr-FR')},${r.temperature},${r.humidity},${r.threshold_status}`
     )
     const csv = [
-      `Rapport de traçabilité — Lot ${lot.batch_number}`,
+      `Rapport de traçabilité - Lot ${lot.batch_number}`,
       `Exploitation: ${lot.farm_name} | Pays: ${lot.country_name} | Statut: ${lot.status}`,
       '',
       header,
@@ -84,7 +84,7 @@ onMounted(fetchLots)
       <div class="action-card">
         <h3>✏️ Mettre à jour le statut d'un lot</h3>
         <select v-model="statusLotId">
-          <option :value="null">— Sélectionner un lot —</option>
+          <option :value="null">- Sélectionner un lot -</option>
           <option v-for="l in lots" :key="l.id" :value="l.id">{{ l.batch_number }} ({{ l.status }})</option>
         </select>
         <select v-model="newStatus">
@@ -99,7 +99,7 @@ onMounted(fetchLots)
       <div class="action-card">
         <h3>📄 Exporter rapport de traçabilité</h3>
         <select v-model="exportLotId">
-          <option :value="null">— Sélectionner un lot —</option>
+          <option :value="null">- Sélectionner un lot -</option>
           <option v-for="l in lots" :key="l.id" :value="l.id">{{ l.batch_number }}</option>
         </select>
         <button @click="exportTraceability" :disabled="!exportLotId || exporting">

@@ -60,7 +60,7 @@ onMounted(fetchLots)
       <h3>Enregistrer une expédition</h3>
       <div class="form-row">
         <select v-model="stockOutLotId">
-          <option :value="null">— Sélectionner un lot —</option>
+          <option :value="null">- Sélectionner un lot -</option>
           <option v-for="lot in lots.filter(l => l.status !== 'shipped')" :key="lot.id" :value="lot.id">
             {{ lot.batch_number }} ({{ lot.status }})
           </option>

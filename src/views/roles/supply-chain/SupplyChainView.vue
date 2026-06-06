@@ -40,7 +40,7 @@ onMounted(fetchAll)
 
 <template>
   <div class="page">
-    <h2>Supply Chain — Vue consolidée</h2>
+    <h2>Supply Chain - Vue consolidée</h2>
 
     <!-- KPI rapides -->
     <div v-if="stockReport" class="kpi-bar">
@@ -62,12 +62,8 @@ onMounted(fetchAll)
     <div v-if="stockReport" class="section">
       <h3>Répartition par statut</h3>
       <div class="status-bar">
-        <div
-          v-for="(count, status) in stockReport.by_status"
-          :key="status"
-          class="status-seg"
-          :title="`${status}: ${count}`"
-        >
+        <div v-for="(count, status) in stockReport.by_status" :key="status" class="status-seg"
+          :title="`${status}: ${count}`">
           {{ status }} ({{ count }})
         </div>
       </div>
@@ -75,7 +71,7 @@ onMounted(fetchAll)
 
     <!-- FIFO à risque -->
     <div class="section">
-      <h3>⚠️ Priorités FIFO — Lots stockés &gt; 300 jours</h3>
+      <h3>⚠️ Priorités FIFO - Lots stockés &gt; 300 jours</h3>
       <LotTable :lots="fifoRiskLots" :loading="loading" />
     </div>
 
@@ -94,16 +90,73 @@ onMounted(fetchAll)
 </template>
 
 <style scoped>
-.page { padding: 2rem; max-width: 1200px; margin: 0 auto; }
-h2 { margin: 0 0 1.5rem; }
-h3 { margin: 0 0 0.75rem; font-size: 0.95rem; font-weight: 600; }
-.kpi-bar { display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 2rem; }
-.kpi { flex: 1; min-width: 150px; background: white; border: 1px solid #e5e7eb; border-radius: 12px; padding: 1rem 1.25rem; text-align: center; }
-.kpi-val { font-size: 2rem; font-weight: 700; color: #1a2e1a; }
-.kpi-label { font-size: 0.8rem; color: #6b7280; }
-.kpi--warn .kpi-val { color: #d97706; }
-.kpi--danger .kpi-val { color: #dc2626; }
-.section { margin-bottom: 2.5rem; }
-.status-bar { display: flex; flex-wrap: wrap; gap: 0.5rem; }
-.status-seg { padding: 4px 12px; background: #f3f4f6; border-radius: 999px; font-size: 0.8rem; color: #374151; }
+.page {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+h2 {
+  margin: 0 0 1.5rem;
+}
+
+h3 {
+  margin: 0 0 0.75rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.kpi-bar {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 2rem;
+}
+
+.kpi {
+  flex: 1;
+  min-width: 150px;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  text-align: center;
+}
+
+.kpi-val {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1a2e1a;
+}
+
+.kpi-label {
+  font-size: 0.8rem;
+  color: #6b7280;
+}
+
+.kpi--warn .kpi-val {
+  color: #d97706;
+}
+
+.kpi--danger .kpi-val {
+  color: #dc2626;
+}
+
+.section {
+  margin-bottom: 2.5rem;
+}
+
+.status-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.status-seg {
+  padding: 4px 12px;
+  background: #f3f4f6;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  color: #374151;
+}
 </style>

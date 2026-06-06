@@ -30,7 +30,7 @@ function pct(n: number) { return `${(n * 100).toFixed(1)}%` }
 
 <template>
   <div class="page">
-    <h2>Reporting Global — Siège</h2>
+    <h2>Reporting Global - Siège</h2>
 
     <div v-if="loading && !globalReport" class="loading">Chargement…</div>
 

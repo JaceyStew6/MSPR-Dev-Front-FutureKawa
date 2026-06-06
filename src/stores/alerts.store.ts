@@ -18,7 +18,7 @@ export const useAlertsStore = defineStore('alerts', () => {
       const res = await alertsService.getAlerts({ active: true, limit: 100 })
       alerts.value = res.data
     } catch {
-      // silencieux — ne pas interrompre l'UX pour un polling
+      // silencieux - ne pas interrompre l'UX pour un polling
     } finally {
       loading.value = false
     }
