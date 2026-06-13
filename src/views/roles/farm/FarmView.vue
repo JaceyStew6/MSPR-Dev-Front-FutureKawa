@@ -7,6 +7,8 @@ import type { Lot } from '@/types/lot.types'
 import LotTable from '@/components/common/LotTable.vue'
 import StatusBadge from '@/components/common/StatusBadge.vue'
 import { storeToRefs } from 'pinia'
+import type { Warehouse } from '@/types/geo.types'
+import { geoService } from '@/services/geo.service'
 
 const authStore = useAuthStore()
 const { user, autoFilters } = storeToRefs(authStore)
@@ -17,6 +19,8 @@ const stockOutLotId = ref<number | null>(null)
 const stockOutReason = ref('')
 const submitting = ref(false)
 const successMsg = ref('')
+const warehouses = ref<Warehouse[]>([])
+const stockOutWarehouseId = ref<number | null>(null)
 
 async function fetchLots() {
   loading.value = true
@@ -28,13 +32,27 @@ async function fetchLots() {
   }
 }
 
+async function fetchWarehouses() {
+  try {
+    const res = await geoService.getWarehouses({ farm_id: autoFilters.value.farm_id })
+    warehouses.value = res
+  } catch (error) {
+    console.error('Erreur lors du chargement des entrepôts')
+  }
+}
+
 async function handleStockOut() {
-  if (!stockOutLotId.value) return
+  if (!stockOutLotId.value || !stockOutWarehouseId.value) return
   submitting.value = true
   try {
-    await movementsService.stockOut({ lot_id: stockOutLotId.value, reason: stockOutReason.value })
+    await movementsService.stockOut({ 
+      lot_id: stockOutLotId.value, 
+      warehouse_id: stockOutWarehouseId.value,
+      reason: stockOutReason.value 
+    })
     successMsg.value = 'Expédition enregistrée.'
     stockOutLotId.value = null
+    stockOutWarehouseId.value = null
     stockOutReason.value = ''
     await fetchLots()
   } finally {
@@ -42,7 +60,11 @@ async function handleStockOut() {
   }
 }
 
-onMounted(fetchLots)
+
+onMounted(() => {
+  fetchLots()
+  fetchWarehouses()
+})
 </script>
 
 <template>
@@ -65,9 +87,15 @@ onMounted(fetchLots)
             {{ lot.batch_number }} ({{ lot.status }})
           </option>
         </select>
+          <select v-model="stockOutWarehouseId">
+            <option :value="null">- Sélectionner un entrepôt -</option>
+            <option v-for="warehouse in warehouses" :key="warehouse.id" :value="warehouse.id">
+              {{ warehouse.name }}
+            </option>
+          </select>
         <input v-model="stockOutReason" placeholder="Motif (optionnel)" />
-        <button class="btn-danger" :disabled="!stockOutLotId || submitting" @click="handleStockOut">
-          {{ submitting ? 'Envoi…' : 'Expédier' }}
+        <button class="btn-danger" :disabled="!stockOutLotId || !stockOutWarehouseId || submitting" @click="handleStockOut">
+            {{ submitting ? 'Envoi…' : 'Expédier' }}
         </button>
       </div>
       <p v-if="successMsg" class="success">{{ successMsg }}</p>

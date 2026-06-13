@@ -24,6 +24,7 @@ export interface StockInPayload {
 
 export interface StockOutPayload {
   lot_id: number
+  warehouse_id: number
   reason?: string
 }
 
