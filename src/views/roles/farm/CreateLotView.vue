@@ -12,15 +12,15 @@ const authStore = useAuthStore()
 const { autoFilters } = storeToRefs(authStore)
 
 const productionDate = ref('')
-const zoneId = ref<number | undefined>(undefined)
+const zoneId = ref<string | undefined>(undefined)
 const zones = ref<Zone[]>([])
 const loading = ref(false)
 const error = ref('')
 
 onMounted(async () => {
-  // Charger les zones de l'entrepôt de l'exploitation
   if (autoFilters.value.warehouse_ids?.length) {
-    const allZones = await Promise.all(autoFilters.value.warehouse_ids.map((wId) => geoService.getZones(wId)))
+    const country = autoFilters.value.country_id
+    const allZones = await Promise.all(autoFilters.value.warehouse_ids.map((wId) => geoService.getZones(wId, country)))
     zones.value = allZones.flat()
   }
 })

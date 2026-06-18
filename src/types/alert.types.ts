@@ -1,15 +1,15 @@
 export type AlertType = 'threshold' | 'expiry' | 'fifo'
 
 export interface Alert {
-  id: number
+  id: string
   type: AlertType
-  lot_id?: number
+  lot_id?: string
   lot_batch_number?: string
-  zone_id?: number
+  zone_id?: string
   zone_name?: string
-  warehouse_id?: number
+  warehouse_id?: string
   warehouse_name?: string
-  country_id?: number
+  country_id?: string
   country_name?: string
   message: string
   is_read: boolean
@@ -20,8 +20,8 @@ export interface Alert {
 export interface AlertFilters {
   active?: boolean
   type?: AlertType
-  country_id?: number
-  warehouse_id?: number
+  country_id?: string
+  warehouse_id?: string
   page?: number
   limit?: number
 }

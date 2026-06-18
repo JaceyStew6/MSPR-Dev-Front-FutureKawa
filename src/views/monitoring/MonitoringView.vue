@@ -13,9 +13,9 @@ const filtersStore = useFiltersStore()
 const { warehouseId } = storeToRefs(filtersStore)
 
 const warehouses = ref<Warehouse[]>([])
-const selectedWarehouseId = ref<number | undefined>(undefined)
+const selectedWarehouseId = ref<string | undefined>(undefined)
 const summary = ref<WarehouseReadingSummary | null>(null)
-const selectedZoneId = ref<number | undefined>(undefined)
+const selectedZoneId = ref<string | undefined>(undefined)
 const loading = ref(false)
 let pollTimer: ReturnType<typeof setInterval> | null = null
 
@@ -28,9 +28,12 @@ async function loadWarehouses() {
 
 async function loadSummary() {
   if (!selectedWarehouseId.value) return
+  const warehouse = warehouses.value.find((w) => w.id === selectedWarehouseId.value)
   loading.value = true
   try {
-    summary.value = await readingsService.getWarehouseSummary(selectedWarehouseId.value)
+    summary.value = await readingsService.getWarehouseSummary(selectedWarehouseId.value, warehouse?.country_id)
+  } catch {
+    summary.value = null
   } finally {
     loading.value = false
   }
@@ -45,14 +48,14 @@ onUnmounted(() => {
   if (pollTimer) clearInterval(pollTimer)
 })
 
-function selectWarehouse(id: number) {
+function selectWarehouse(id: string) {
   selectedWarehouseId.value = id
   selectedZoneId.value = undefined
   summary.value = null
   loadSummary()
 }
 
-function selectZone(id: number) {
+function selectZone(id: string) {
   selectedZoneId.value = selectedZoneId.value === id ? undefined : id
 }
 </script>

@@ -19,18 +19,18 @@ const msg = ref('')
 
 // Stock-in
 const stockInLotId = ref('')
-const stockInZoneId = ref<number | undefined>()
+const stockInZoneId = ref<string | undefined>()
 
 // Stock-out
-const stockOutLotId = ref<number | null>(null)
+const stockOutLotId = ref<string | null>(null)
 const stockOutReason = ref('')
 
 // Zone transfer
-const transferLotId = ref<number | null>(null)
-const transferZoneId = ref<number | undefined>()
+const transferLotId = ref<string | null>(null)
+const transferZoneId = ref<string | undefined>()
 
 // Status update
-const statusLotId = ref<number | null>(null)
+const statusLotId = ref<string | null>(null)
 const newStatus = ref<LotStatus>('stored')
 
 async function fetchLots() {
@@ -46,13 +46,14 @@ async function fetchLots() {
 
 async function loadZones() {
   const ids = autoFilters.value.warehouse_ids ?? []
-  const allZones = await Promise.all(ids.map((id) => geoService.getZones(id)))
+  const country = autoFilters.value.country_id
+  const allZones = await Promise.all(ids.map((id) => geoService.getZones(id, country)))
   zones.value = allZones.flat()
 }
 
 async function doStockIn() {
   if (!stockInLotId.value || !stockInZoneId.value || !autoFilters.value.warehouse_ids?.[0]) return
-  await movementsService.stockIn({ lot_id: Number(stockInLotId.value), zone_id: stockInZoneId.value, warehouse_id: autoFilters.value.warehouse_ids[0] })
+  await movementsService.stockIn({ lot_id: stockInLotId.value, zone_id: stockInZoneId.value, warehouse_id: autoFilters.value.warehouse_ids[0] })
   msg.value = 'Entrée enregistrée.'
   stockInLotId.value = ''; stockInZoneId.value = undefined
   fetchLots()

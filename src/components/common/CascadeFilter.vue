@@ -31,7 +31,7 @@ watch(countryId, async (id) => {
 })
 
 watch(warehouseId, async (id) => {
-  zones.value = id ? await geoService.getZones(id) : []
+  zones.value = id ? await geoService.getZones(id, countryId.value) : []
 })
 </script>
 
@@ -39,7 +39,7 @@ watch(warehouseId, async (id) => {
   <div class="cascade-filter">
     <select
       :value="countryId"
-      @change="filtersStore.setCountry(($event.target as HTMLSelectElement).value ? Number(($event.target as HTMLSelectElement).value) : undefined)"
+      @change="filtersStore.setCountry(($event.target as HTMLSelectElement).value || undefined)"
       :disabled="!!autoFilters.country_id"
     >
       <option value="">- Pays -</option>
@@ -48,7 +48,7 @@ watch(warehouseId, async (id) => {
 
     <select
       :value="farmId"
-      @change="filtersStore.setFarm(($event.target as HTMLSelectElement).value ? Number(($event.target as HTMLSelectElement).value) : undefined)"
+      @change="filtersStore.setFarm(($event.target as HTMLSelectElement).value || undefined)"
       :disabled="!countryId"
     >
       <option value="">- Exploitation -</option>
@@ -57,7 +57,7 @@ watch(warehouseId, async (id) => {
 
     <select
       :value="warehouseId"
-      @change="filtersStore.setWarehouse(($event.target as HTMLSelectElement).value ? Number(($event.target as HTMLSelectElement).value) : undefined)"
+      @change="filtersStore.setWarehouse(($event.target as HTMLSelectElement).value || undefined)"
       :disabled="!countryId"
     >
       <option value="">- Entrepôt -</option>
@@ -66,7 +66,7 @@ watch(warehouseId, async (id) => {
 
     <select
       :value="zoneId"
-      @change="filtersStore.setZone(($event.target as HTMLSelectElement).value ? Number(($event.target as HTMLSelectElement).value) : undefined)"
+      @change="filtersStore.setZone(($event.target as HTMLSelectElement).value || undefined)"
       :disabled="!warehouseId"
     >
       <option value="">- Zone -</option>

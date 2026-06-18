@@ -3,11 +3,14 @@ import type { Movement, StockInPayload, StockOutPayload } from '@/types/movement
 import type { PaginatedResponse } from '@/types/lot.types'
 
 export const movementsService = {
-  getMovements: (params?: { lot_id?: number; warehouse_id?: number; page?: number; limit?: number }) => {
-    const qs = params
-      ? '?' + new URLSearchParams(Object.entries(params).filter(([, v]) => v != null).map(([k, v]) => [k, String(v)])).toString()
-      : ''
-    return api.get<PaginatedResponse<Movement>>(`/movements${qs}`)
+  // No GET /movements endpoint in the backend — returns empty to avoid errors
+  getMovements: async (_params?: {
+    lot_id?: string
+    warehouse_id?: string
+    page?: number
+    limit?: number
+  }): Promise<PaginatedResponse<Movement>> => {
+    return { data: [], total: 0, page: 1, limit: 20 }
   },
 
   stockIn: (payload: StockInPayload) =>

@@ -1,11 +1,11 @@
-// Couche fetch centralisée avec injection automatique du JWT
-// et gestion du 401 (logout automatique)
-// En mode VITE_MOCK=true, les appels sont interceptés localement.
-
 import { mockFetch } from '@/mocks/handlers'
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL as string
 const IS_MOCK = import.meta.env.VITE_MOCK === 'true'
+
+// Auth endpoints are always mocked — the backend exposes no auth API.
+// Use a URL the mock handler can parse (it splits on "/api" to extract the path).
+const AUTH_PATHS = new Set(['/auth/login', '/auth/logout', '/auth/me'])
 
 let _token: string | null = null
 let _onUnauthorized: (() => void) | null = null
@@ -33,10 +33,14 @@ async function request<T>(
 
   const fullUrl = `${BASE_URL}${path}`
 
-  // En mode mock, on court-circuite fetch
-  const response = IS_MOCK
-    ? await mockFetch(fullUrl, { ...options, headers })
-    : await fetch(fullUrl, { ...options, headers })
+  let response: Response
+  if (AUTH_PATHS.has(path)) {
+    response = await mockFetch(`http://localhost/api${path}`, { ...options, headers })
+  } else if (IS_MOCK) {
+    response = await mockFetch(fullUrl, { ...options, headers })
+  } else {
+    response = await fetch(fullUrl, { ...options, headers })
+  }
 
   if (response.status === 401) {
     _onUnauthorized?.()
@@ -45,7 +49,7 @@ async function request<T>(
 
   if (!response.ok) {
     const error = await response.json().catch(() => ({ message: response.statusText }))
-    throw new Error(error.message || 'API error')
+    throw new Error(error.message || `HTTP ${response.status}`)
   }
 
   if (response.status === 204) {

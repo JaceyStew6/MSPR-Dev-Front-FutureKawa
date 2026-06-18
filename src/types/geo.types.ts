@@ -1,27 +1,27 @@
 export interface Country {
-  id: number
+  id: string
   name: string
   code: string
 }
 
 export interface Farm {
-  id: number
+  id: string
   name: string
-  country_id: number
+  country_id: string
   country_name?: string
 }
 
 export interface Warehouse {
-  id: number
+  id: string
   name: string
-  country_id: number
-  farm_id?: number
+  country_id: string
+  farm_id?: string
 }
 
 export interface Zone {
-  id: number
+  id: string
   name: string
-  warehouse_id: number
+  warehouse_id: string
   target_temperature?: number
   target_humidity?: number
   tolerance?: number

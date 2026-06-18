@@ -6,13 +6,13 @@ export type UserRole =
   | 'hq'
 
 export interface User {
-  id: number
+  id: string
   email: string
   name: string
   role: UserRole
-  country_id?: number
-  farm_id?: number
-  warehouse_ids?: number[]
+  country_id?: string
+  farm_id?: string
+  warehouse_ids?: string[]
 }
 
 export interface LoginPayload {

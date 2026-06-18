@@ -1,23 +1,64 @@
 import { api } from './api'
 import type { Lot, LotFilters, LotStatus, PaginatedResponse } from '@/types/lot.types'
 
-function buildQs(params: Record<string, string | number | boolean | undefined>) {
-  const entries = Object.entries(params).filter(([, v]) => v != null) as [string, string | number | boolean][]
-  return entries.length ? '?' + new URLSearchParams(entries.map(([k, v]) => [k, String(v)])).toString() : ''
+// Actual shape returned by GET /lots and GET /lot/{id}
+interface BackendLot {
+  idLot: string
+  status?: string
+  quantite?: number
+  caracteristique?: number
+  dateSortie?: string
+  dateStockage?: string
+  dateProduction?: string
+  emplacement?: string
+  idExploitation?: string
+  idEntrepot?: string
+}
+
+function mapLot(b: BackendLot): Lot {
+  return {
+    id: b.idLot,
+    batch_number: b.idLot.substring(0, 8).toUpperCase(),
+    farm_id: b.idExploitation ?? '',
+    warehouse_id: b.idEntrepot,
+    zone_name: b.emplacement,
+    production_date: b.dateProduction ?? '',
+    storage_date: b.dateStockage,
+    status: (b.status?.toLowerCase() as LotStatus) ?? 'pending',
+  }
 }
 
 export const lotsService = {
-  getLots: (filters: LotFilters = {}) =>
-    api.get<PaginatedResponse<Lot>>(`/lots${buildQs(filters as Record<string, string | number | boolean | undefined>)}`),
+  getLots: async (filters: LotFilters = {}): Promise<PaginatedResponse<Lot>> => {
+    const lots = await api.get<BackendLot[]>('/lots')
+    let mapped = lots.map(mapLot)
 
-  getLot: (id: number) => api.get<Lot>(`/lots/${id}`),
+    // Client-side filtering (backend does not support filters)
+    if (filters.status) mapped = mapped.filter((l) => l.status === filters.status)
+    if (filters.warehouse_id) mapped = mapped.filter((l) => l.warehouse_id === filters.warehouse_id)
+    if (filters.farm_id) mapped = mapped.filter((l) => l.farm_id === filters.farm_id)
 
-  createLot: (payload: { production_date: string; farm_id: number; zone_id: number }) =>
-    api.post<Lot>('/lots', payload),
+    // FIFO sort by storage date if requested
+    if (filters.sort === 'storage_date_asc') {
+      mapped.sort((a, b) => (a.storage_date ?? '').localeCompare(b.storage_date ?? ''))
+    }
 
-  updateStatus: (id: number, status: LotStatus) =>
-    api.patch<Lot>(`/lots/${id}/status`, { status }),
+    // Simulated pagination
+    const page = filters.page ?? 1
+    const limit = filters.limit ?? mapped.length
+    const start = (page - 1) * limit
+    return { data: mapped.slice(start, start + limit), total: mapped.length, page, limit }
+  },
 
-  updateZone: (id: number, zone_id: number) =>
-    api.patch<Lot>(`/lots/${id}/zone`, { zone_id }),
+  getLot: (id: string) =>
+    api.get<BackendLot>(`/lot/${id}`).then(mapLot),
+
+  createLot: (payload: { production_date: string; farm_id: string; zone_id: string }) =>
+    api.post<BackendLot>('/lots', payload).then(mapLot),
+
+  updateStatus: (id: string, status: LotStatus) =>
+    api.patch<BackendLot>(`/lots/${id}/status`, { status }).then(mapLot),
+
+  updateZone: (id: string, zone_id: string) =>
+    api.patch<BackendLot>(`/lots/${id}/zone`, { zone_id }).then(mapLot),
 }

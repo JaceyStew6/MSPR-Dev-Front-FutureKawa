@@ -2,10 +2,10 @@ export type Granularity = 'raw' | '1h' | '1d'
 export type ThresholdStatus = 'ok' | 'warn' | 'alert'
 
 export interface Reading {
-  id: number
-  lot_id?: number
-  zone_id?: number
-  warehouse_id?: number
+  id: string
+  lot_id?: string
+  zone_id?: string
+  warehouse_id?: string
   temperature: number
   humidity: number
   recorded_at: string
@@ -13,16 +13,16 @@ export interface Reading {
 }
 
 export interface ReadingFilters {
-  lot_id?: number
-  zone_id?: number
-  warehouse_id?: number
+  lot_id?: string
+  zone_id?: string
+  warehouse_id?: string
   granularity?: Granularity
   from?: string
   to?: string
 }
 
 export interface ZoneLatestReading {
-  zone_id: number
+  zone_id: string
   zone_name: string
   temperature: number
   humidity: number
@@ -31,6 +31,6 @@ export interface ZoneLatestReading {
 }
 
 export interface WarehouseReadingSummary {
-  warehouse_id: number
+  warehouse_id: string
   zones: ZoneLatestReading[]
 }

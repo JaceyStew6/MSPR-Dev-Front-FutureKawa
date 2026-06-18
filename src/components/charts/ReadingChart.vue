@@ -19,9 +19,9 @@ import type { Granularity } from '@/types/reading.types'
 Chart.register(LineController, LineElement, PointElement, LinearScale, TimeScale, Tooltip, Legend, Filler)
 
 const props = defineProps<{
-  lotId?: number
-  zoneId?: number
-  warehouseId?: number
+  lotId?: string
+  zoneId?: string
+  warehouseId?: string
 }>()
 
 const granularity = ref<Granularity>('1h')

@@ -42,31 +42,33 @@ export const ZONES: Record<number, { id: number; name: string; warehouse_id: num
   ],
 }
 
-// ── Utilisateurs (un par rôle) ─────────────────────────────────────────────────
+// ── Utilisateurs mock pour l'authentification ─────────────────────────────────
+// country_id doit correspondre exactement aux clés retournées par GET /countries
+// warehouse_ids doit contenir de vrais UUIDs du backend (GET /warehouses/{pays})
 
 export const USERS = [
   {
-    id: 1,
+    id: 'mock-farm-1',
     email: 'farm@futurekawa.com',
     password: 'test',
     name: 'Carlos Mendez',
     role: 'farm_manager',
-    country_id: 1,
-    farm_id: 1,
-    warehouse_ids: [1],
+    country_id: 'colombie',   // adapter à la clé exacte de /countries
+    farm_id: undefined,       // remplacer par un vrai UUID de /farms/colombie
+    warehouse_ids: undefined, // remplacer par de vrais UUIDs de /warehouses/colombie
   },
   {
-    id: 2,
+    id: 'mock-warehouse-1',
     email: 'warehouse@futurekawa.com',
     password: 'test',
     name: 'Sophie Martin',
     role: 'warehouse_manager',
-    country_id: 1,
+    country_id: 'colombie',   // adapter à la clé exacte de /countries
     farm_id: undefined,
-    warehouse_ids: [1, 2],
+    warehouse_ids: undefined, // remplacer par de vrais UUIDs de /warehouses/colombie
   },
   {
-    id: 3,
+    id: 'mock-quality-1',
     email: 'quality@futurekawa.com',
     password: 'test',
     name: 'Aïsha Koné',
@@ -76,7 +78,7 @@ export const USERS = [
     warehouse_ids: undefined,
   },
   {
-    id: 4,
+    id: 'mock-supply-1',
     email: 'supply@futurekawa.com',
     password: 'test',
     name: 'Thomas Legrand',
@@ -86,7 +88,7 @@ export const USERS = [
     warehouse_ids: undefined,
   },
   {
-    id: 5,
+    id: 'mock-hq-1',
     email: 'hq@futurekawa.com',
     password: 'test',
     name: 'Marie Dupont',

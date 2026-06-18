@@ -7,7 +7,7 @@ export interface GlobalKPIs {
 }
 
 export interface CountryBreakdown {
-  country_id: number
+  country_id: string
   country_name: string
   total_lots: number
   compliance_rate: number
@@ -31,7 +31,7 @@ export interface QualityReport {
   total_alerts: number
   incidents: number
   by_zone: {
-    zone_id: number
+    zone_id: string
     zone_name: string
     warehouse_name: string
     drift_count: number

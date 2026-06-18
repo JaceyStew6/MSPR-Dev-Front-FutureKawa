@@ -1,15 +1,15 @@
 export type LotStatus = 'pending' | 'stored' | 'compliant' | 'alert' | 'blocked' | 'shipped'
 
 export interface Lot {
-  id: number
+  id: string
   batch_number: string
-  farm_id: number
+  farm_id: string
   farm_name?: string
-  country_id: number
+  country_id?: string
   country_name?: string
-  warehouse_id?: number
+  warehouse_id?: string
   warehouse_name?: string
-  zone_id?: number
+  zone_id?: string
   zone_name?: string
   production_date: string
   storage_date?: string
@@ -23,10 +23,10 @@ export interface Lot {
 }
 
 export interface LotFilters {
-  country_id?: number
-  farm_id?: number
-  warehouse_id?: number
-  zone_id?: number
+  country_id?: string
+  farm_id?: string
+  warehouse_id?: string
+  zone_id?: string
   status?: LotStatus
   page?: number
   limit?: number

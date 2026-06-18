@@ -15,12 +15,12 @@ const { user, autoFilters } = storeToRefs(authStore)
 
 const lots = ref<Lot[]>([])
 const loading = ref(false)
-const stockOutLotId = ref<number | null>(null)
+const stockOutLotId = ref<string | null>(null)
 const stockOutReason = ref('')
 const submitting = ref(false)
 const successMsg = ref('')
 const warehouses = ref<Warehouse[]>([])
-const stockOutWarehouseId = ref<number | null>(null)
+const stockOutWarehouseId = ref<string | null>(null)
 
 async function fetchLots() {
   loading.value = true
@@ -34,10 +34,10 @@ async function fetchLots() {
 
 async function fetchWarehouses() {
   try {
-    const res = await geoService.getWarehouses({ farm_id: autoFilters.value.farm_id })
+    const res = await geoService.getWarehouses({ country_id: autoFilters.value.country_id })
     warehouses.value = res
-  } catch (error) {
-    console.error('Erreur lors du chargement des entrepôts')
+  } catch {
+    // silencieux
   }
 }
 

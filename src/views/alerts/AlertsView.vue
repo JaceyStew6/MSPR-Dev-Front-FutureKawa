@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue'
 import { useAlertsStore } from '@/stores/alerts.store'
+import { useAuthStore } from '@/stores/auth.store'
 import { alertsService } from '@/services/alerts.service'
 import type { Alert, AlertType } from '@/types/alert.types'
 import Pagination from '@/components/common/Pagination.vue'
@@ -8,32 +9,42 @@ import { storeToRefs } from 'pinia'
 
 const alertsStore = useAlertsStore()
 const { alerts: storeAlerts } = storeToRefs(alertsStore)
+const authStore = useAuthStore()
+const { autoFilters } = storeToRefs(authStore)
 
 const alerts = ref<Alert[]>([])
 const total = ref(0)
 const page = ref(1)
 const limit = 20
 const loading = ref(false)
+const fetchError = ref<string | null>(null)
 const typeFilter = ref<AlertType | ''>('')
 const activeOnly = ref(true)
 
 async function fetchAlerts() {
   loading.value = true
+  fetchError.value = null
   try {
     const res = await alertsService.getAlerts({
       active: activeOnly.value || undefined,
       type: typeFilter.value || undefined,
       page: page.value,
       limit,
+      country_id: autoFilters.value.country_id,
+      warehouse_id: autoFilters.value.warehouse_ids?.[0],
     })
     alerts.value = res.data
     total.value = res.total
+  } catch (e: unknown) {
+    fetchError.value = e instanceof Error ? e.message : 'Failed to load alerts'
+    alerts.value = []
+    total.value = 0
   } finally {
     loading.value = false
   }
 }
 
-async function markRead(id: number) {
+async function markRead(id: string) {
   await alertsStore.markAsRead(id)
   const a = alerts.value.find((x) => x.id === id)
   if (a) a.is_read = true
@@ -68,6 +79,8 @@ const TYPE_LABEL: Record<AlertType, string> = {
     </div>
 
     <div v-if="loading" class="loading">Chargement…</div>
+
+    <div v-else-if="fetchError" class="error-banner">{{ fetchError }}</div>
 
     <ul v-else class="alert-list">
       <li
@@ -108,6 +121,7 @@ h2 { margin: 0 0 1.5rem; }
 .checkbox-label { display: flex; align-items: center; gap: 6px; font-size: 0.875rem; cursor: pointer; }
 select { padding: 6px 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 0.875rem; }
 .loading { text-align: center; padding: 2rem; color: #6b7280; }
+.error-banner { padding: 1rem 1.25rem; background: #fee2e2; color: #991b1b; border-radius: 8px; font-size: 0.875rem; }
 .alert-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.75rem; }
 .alert-item {
   background: white;

@@ -10,11 +10,11 @@ const loading = ref(false)
 const msg = ref('')
 
 // Mise à jour statut
-const statusLotId = ref<number | null>(null)
+const statusLotId = ref<string | null>(null)
 const newStatus = ref<LotStatus>('compliant')
 
 // Export tracabilité
-const exportLotId = ref<number | null>(null)
+const exportLotId = ref<string | null>(null)
 const exporting = ref(false)
 
 async function fetchLots() {

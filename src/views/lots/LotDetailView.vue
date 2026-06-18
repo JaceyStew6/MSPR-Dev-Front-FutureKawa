@@ -14,7 +14,7 @@ const error = ref('')
 
 onMounted(async () => {
   try {
-    lot.value = await lotsService.getLot(Number(props.id))
+    lot.value = await lotsService.getLot(props.id)
   } catch {
     error.value = 'Lot introuvable'
   } finally {
