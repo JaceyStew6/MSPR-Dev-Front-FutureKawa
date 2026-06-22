@@ -1,4 +1,5 @@
 import { api } from './api'
+import { geoService } from './geo.service'
 import type { Lot, LotFilters, LotStatus, PaginatedResponse } from '@/types/lot.types'
 
 // Actual shape returned by GET /lots and GET /lot/{id}
@@ -30,8 +31,26 @@ function mapLot(b: BackendLot): Lot {
 
 export const lotsService = {
   getLots: async (filters: LotFilters = {}): Promise<PaginatedResponse<Lot>> => {
-    const lots = await api.get<BackendLot[]>('/lots')
-    let mapped = lots.map(mapLot)
+    const raw = await api.get<BackendLot[]>('/lots')
+    let mapped = raw.map(mapLot)
+
+    // Enrich with display names when country is known (warehouse and farm names are not in the backend lot response)
+    if (filters.country_id) {
+      const countryName = filters.country_id.charAt(0).toUpperCase() + filters.country_id.slice(1).toLowerCase()
+      const [warehouses, farms] = await Promise.all([
+        geoService.getWarehouses({ country_id: filters.country_id }),
+        geoService.getFarms(filters.country_id),
+      ])
+      const warehouseMap = new Map(warehouses.map((w) => [w.id, w.name]))
+      const farmMap = new Map(farms.map((f) => [f.id, f.name]))
+      mapped = mapped.map((l) => ({
+        ...l,
+        country_id: filters.country_id,
+        country_name: countryName,
+        warehouse_name: l.warehouse_id ? (warehouseMap.get(l.warehouse_id) ?? l.warehouse_name) : l.warehouse_name,
+        farm_name: l.farm_id ? (farmMap.get(l.farm_id) ?? l.farm_name) : l.farm_name,
+      }))
+    }
 
     // Client-side filtering (backend does not support filters)
     if (filters.status) mapped = mapped.filter((l) => l.status === filters.status)

@@ -23,7 +23,8 @@ function formatDate(d: string | undefined) {
           <th>N° Lot</th>
           <th>Pays</th>
           <th>Exploitation</th>
-          <th>Entrepôt / Zone</th>
+          <th>Entrepôt</th>
+          <th>Zone</th>
           <th>Date production</th>
           <th>Date stockage ↑ (FIFO)</th>
           <th>Statut</th>
@@ -36,7 +37,8 @@ function formatDate(d: string | undefined) {
           <td class="batch">{{ lot.batch_number }}</td>
           <td>{{ lot.country_name ?? lot.country_id }}</td>
           <td>{{ lot.farm_name ?? lot.farm_id }}</td>
-          <td>{{ lot.warehouse_name ?? '-' }}<span v-if="lot.zone_name"> / {{ lot.zone_name }}</span></td>
+          <td>{{ lot.warehouse_name ?? '-' }}</td>
+          <td>{{ lot.zone_name ?? '-' }}</td>
           <td>{{ formatDate(lot.production_date) }}</td>
           <td>{{ formatDate(lot.storage_date) }}</td>
           <td><StatusBadge :status="lot.status" /></td>
@@ -53,7 +55,7 @@ function formatDate(d: string | undefined) {
           </td>
         </tr>
         <tr v-if="lots.length === 0">
-          <td colspan="9" class="empty">Aucun lot trouvé</td>
+          <td colspan="10" class="empty">Aucun lot trouvé</td>
         </tr>
       </tbody>
     </table>

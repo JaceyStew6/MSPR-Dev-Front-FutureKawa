@@ -37,7 +37,12 @@ async function fetchLots() {
   loading.value = true
   try {
     const warehouseId = autoFilters.value.warehouse_ids?.[0]
-    const res = await lotsService.getLots({ warehouse_id: warehouseId, sort: 'storage_date_asc', limit: 100 })
+    const res = await lotsService.getLots({
+      warehouse_id: warehouseId,
+      country_id: autoFilters.value.country_id,
+      sort: 'storage_date_asc',
+      limit: 100,
+    })
     lots.value = res.data
   } finally {
     loading.value = false
