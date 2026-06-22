@@ -40,8 +40,9 @@ export async function mockFetch(url: string, options: RequestInit = {}): Promise
   const method = (options.method ?? 'GET').toUpperCase()
   const body = options.body ? JSON.parse(options.body as string) : null
 
-  // Extraire le path sans la base URL
-  const path = url.includes('/api') ? url.split('/api')[1] : url
+  // Extraire le path sans la base URL (gère /api-siege/... et http://localhost/api/...)
+  const stripped = url.replace(/^https?:\/\/[^/]+/, '')
+  const path = stripped.replace(/^\/api(?:-siege)?/, '') || '/'
 
   // ── Auth ──────────────────────────────────────────────────────────────────
 
@@ -200,15 +201,26 @@ export async function mockFetch(url: string, options: RequestInit = {}): Promise
     return ok(alert)
   }
 
-  if (method === 'GET' && path.startsWith('/alerts')) {
+  if (method === 'GET' && path.startsWith('/alertes')) {
     const qs = parseQs(path)
-    let alerts = [...ALERTS]
-    if (qs.active === 'true') alerts = alerts.filter((a) => a.is_active)
-    if (qs.type) alerts = alerts.filter((a) => a.type === qs.type)
-    if (qs.country_id) alerts = alerts.filter((a) => a.country_id === num(qs.country_id))
-    if (qs.warehouse_id) alerts = alerts.filter((a) => a.warehouse_id === num(qs.warehouse_id))
-    alerts.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-    return ok(paginate(alerts, num(qs.page) ?? 1, num(qs.limit) ?? 20))
+    let filtered = [...ALERTS]
+    // Filtre par pays (insensible à la casse, compare au country_name du mock)
+    if (qs.pays) filtered = filtered.filter((a) =>
+      (a as Record<string, unknown>).country_name?.toString().toLowerCase() === qs.pays.toLowerCase()
+    )
+    // Filtre par idEntrepot (UUID réel en prod, ID numérique en mock)
+    if (qs.idEntrepot) filtered = filtered.filter((a) =>
+      String((a as Record<string, unknown>).warehouse_id) === qs.idEntrepot
+    )
+    filtered.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+    // Retourne le format BackendAlert — mapAlert() dans le service se charge de la conversion
+    return ok(filtered.map((a) => ({
+      idAlerte: String(a.id),
+      typeAlerte: a.type,
+      description: a.message,
+      dateEmission: a.created_at,
+      idZone: String((a as Record<string, unknown>).zone_id ?? ''),
+    })))
   }
 
   // ── Mouvements ────────────────────────────────────────────────────────────

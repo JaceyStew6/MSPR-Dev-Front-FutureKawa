@@ -98,7 +98,7 @@ onMounted(() => { fetchLots(); loadZones() })
     <div class="actions-grid">
       <!-- Stock-in -->
       <div class="action-card">
-        <h3>📥 Entrée en stock</h3>
+        <h3>Entrée en stock</h3>
         <input v-model="stockInLotId" placeholder="ID ou N° lot" />
         <select v-model="stockInZoneId">
           <option :value="undefined">- Zone -</option>
@@ -109,7 +109,7 @@ onMounted(() => { fetchLots(); loadZones() })
 
       <!-- Stock-out -->
       <div class="action-card">
-        <h3>📤 Sortie de stock</h3>
+        <h3>Sortie de stock</h3>
         <select v-model="stockOutLotId">
           <option :value="null">- Sélectionner lot -</option>
           <option v-for="l in lots" :key="l.id" :value="l.id">{{ l.batch_number }}</option>
@@ -120,7 +120,7 @@ onMounted(() => { fetchLots(); loadZones() })
 
       <!-- Zone transfer -->
       <div class="action-card">
-        <h3>🔄 Déplacer un lot</h3>
+        <h3>Déplacer un lot</h3>
         <select v-model="transferLotId">
           <option :value="null">- Sélectionner lot -</option>
           <option v-for="l in lots" :key="l.id" :value="l.id">{{ l.batch_number }}</option>
@@ -134,7 +134,7 @@ onMounted(() => { fetchLots(); loadZones() })
 
       <!-- Status update -->
       <div class="action-card">
-        <h3>✏️ Mettre à jour statut</h3>
+        <h3>Mettre à jour statut</h3>
         <select v-model="statusLotId">
           <option :value="null">- Sélectionner lot -</option>
           <option v-for="l in lots" :key="l.id" :value="l.id">{{ l.batch_number }}</option>
@@ -159,18 +159,95 @@ onMounted(() => { fetchLots(); loadZones() })
 </template>
 
 <style scoped>
-.page { padding: 2rem; max-width: 1200px; margin: 0 auto; }
-.page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
-h2 { margin: 0; }
-.btn-link { color: #15803d; text-decoration: none; font-size: 0.875rem; }
-.success { color: #15803d; font-size: 0.875rem; background: #f0fdf4; padding: 8px 12px; border-radius: 6px; }
-.actions-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
-.action-card { background: white; border: 1px solid #e5e7eb; border-radius: 12px; padding: 1.25rem; display: flex; flex-direction: column; gap: 0.6rem; }
-h3 { margin: 0 0 0.25rem; font-size: 0.9rem; font-weight: 600; }
-select, input { padding: 7px 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 0.875rem; width: 100%; box-sizing: border-box; }
-button { padding: 8px; background: #1a2e1a; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.875rem; }
-button:disabled { opacity: 0.5; }
-.btn-danger { background: #dc2626; }
-.section { margin-top: 1rem; }
-.fifo-hint { font-weight: 400; font-size: 0.78rem; color: #6b7280; }
+.page {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+h2 {
+  margin: 0;
+}
+
+.btn-link {
+  color: #15803d;
+  text-decoration: none;
+  font-size: 0.875rem;
+}
+
+.success {
+  color: #15803d;
+  font-size: 0.875rem;
+  background: #f0fdf4;
+  padding: 8px 12px;
+  border-radius: 6px;
+}
+
+.actions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.action-card {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+h3 {
+  margin: 0 0 0.25rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+select,
+input {
+  padding: 7px 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+button {
+  padding: 8px;
+  background: #1a2e1a;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.875rem;
+}
+
+button:disabled {
+  opacity: 0.5;
+}
+
+.btn-danger {
+  background: #dc2626;
+}
+
+.section {
+  margin-top: 1rem;
+}
+
+.fifo-hint {
+  font-weight: 400;
+  font-size: 0.78rem;
+  color: #6b7280;
+}
 </style>

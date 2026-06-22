@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { authService } from '@/services/auth.service'
+import { geoService } from '@/services/geo.service'
 import { setToken, setUnauthorizedHandler } from '@/services/api'
 import type { User, UserRole, LoginPayload } from '@/types/user.types'
 
@@ -18,10 +19,21 @@ export const useAuthStore = defineStore('auth', () => {
     warehouse_ids: user.value?.warehouse_ids,
   }))
 
+  async function enrichWarehouseIds(u: User): Promise<User> {
+    if (u.role !== 'warehouse_manager' || !u.country_id || u.warehouse_ids?.length) return u
+    try {
+      const warehouses = await geoService.getWarehouses({ country_id: u.country_id })
+      const ids = warehouses.map((w) => w.id).filter(Boolean)
+      return ids.length ? { ...u, warehouse_ids: ids } : u
+    } catch {
+      return u
+    }
+  }
+
   async function login(payload: LoginPayload) {
     const res = await authService.login(payload)
     token.value = res.token
-    user.value = res.user
+    user.value = await enrichWarehouseIds(res.user)
     setToken(res.token)
   }
 
@@ -39,7 +51,7 @@ export const useAuthStore = defineStore('auth', () => {
 
   async function fetchMe() {
     const me = await authService.me()
-    user.value = me
+    user.value = await enrichWarehouseIds(me)
   }
 
   function init() {

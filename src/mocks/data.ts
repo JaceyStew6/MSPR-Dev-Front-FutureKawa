@@ -63,9 +63,9 @@ export const USERS = [
     password: 'test',
     name: 'Sophie Martin',
     role: 'warehouse_manager',
-    country_id: 'colombie',   // adapter à la clé exacte de /countries
+    country_id: 'colombie',  // doit correspondre au format exact attendu par le backend (pays=...)
     farm_id: undefined,
-    warehouse_ids: undefined, // remplacer par de vrais UUIDs de /warehouses/colombie
+    warehouse_ids: undefined, // rempli dynamiquement après login via GET /warehouses/{pays}
   },
   {
     id: 'mock-quality-1',
