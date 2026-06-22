@@ -31,6 +31,7 @@ export interface LotFilters {
   page?: number
   limit?: number
   sort?: 'storage_date_asc' | 'storage_date_desc' | 'production_date_asc'
+  withReadings?: boolean
 }
 
 export interface PaginatedResponse<T> {

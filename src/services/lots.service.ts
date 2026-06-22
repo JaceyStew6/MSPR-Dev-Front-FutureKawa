@@ -1,5 +1,6 @@
 import { api } from './api'
 import { geoService } from './geo.service'
+import { readingsService } from './readings.service'
 import type { Lot, LotFilters, LotStatus, PaginatedResponse } from '@/types/lot.types'
 
 // Actual shape returned by GET /lots and GET /lot/{id}
@@ -89,7 +90,29 @@ export const lotsService = {
     const page = filters.page ?? 1
     const limit = filters.limit ?? mapped.length
     const start = (page - 1) * limit
-    return { data: mapped.slice(start, start + limit), total: mapped.length, page, limit }
+    const pageData = mapped.slice(start, start + limit)
+
+    // Fetch latest reading per lot only for the current page (avoids N+1 on the full dataset)
+    if (filters.withReadings) {
+      const latestReadings = await Promise.all(pageData.map((l) => readingsService.getLatestReading(l.id)))
+      return {
+        data: pageData.map((l, i) => {
+          const r = latestReadings[i]
+          return r ? {
+            ...l,
+            latest_reading: {
+              temperature: r.temperature,
+              humidity: r.humidite,
+              recorded_at: r.dateMesure,
+              threshold_status: 'ok' as const,
+            },
+          } : l
+        }),
+        total: mapped.length, page, limit,
+      }
+    }
+
+    return { data: pageData, total: mapped.length, page, limit }
   },
 
   getLot: async (id: string, country_id?: string): Promise<Lot> => {

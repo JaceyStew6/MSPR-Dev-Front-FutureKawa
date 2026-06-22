@@ -48,6 +48,18 @@ function mapReading(b: BackendReading, index: number): Reading {
 }
 
 export const readingsService = {
+  getLatestReading: async (lot_id: string): Promise<BackendLotReading | null> => {
+    try {
+      const readings = await api.get<BackendLotReading[]>(`/lot/${lot_id}/mesures`)
+      if (!readings.length) return null
+      return readings.reduce((a, b) =>
+        new Date(a.dateMesure) >= new Date(b.dateMesure) ? a : b
+      )
+    } catch {
+      return null
+    }
+  },
+
   getReadings: async (filters: ReadingFilters = {}): Promise<Reading[]> => {
     // Readings by lot → GET /lot/{idLot}/mesures
     if (filters.lot_id) {

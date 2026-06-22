@@ -42,6 +42,7 @@ async function fetchLots() {
       country_id: autoFilters.value.country_id,
       sort: 'storage_date_asc',
       limit: 100,
+      withReadings: true,
     })
     lots.value = res.data
   } finally {

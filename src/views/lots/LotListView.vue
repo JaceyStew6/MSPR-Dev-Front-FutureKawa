@@ -33,6 +33,7 @@ async function fetchLots() {
       sort: 'storage_date_asc',
       page: page.value,
       limit,
+      withReadings: true,
     })
     lots.value = res.data
     total.value = res.total
