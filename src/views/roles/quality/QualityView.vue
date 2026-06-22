@@ -82,7 +82,7 @@ onMounted(fetchLots)
     <div class="actions-grid">
       <!-- Mise à jour statut -->
       <div class="action-card">
-        <h3>✏️ Mettre à jour le statut d'un lot</h3>
+        <h3>Mettre à jour le statut d'un lot</h3>
         <select v-model="statusLotId">
           <option :value="null">- Sélectionner un lot -</option>
           <option v-for="l in lots" :key="l.id" :value="l.id">{{ l.batch_number }} ({{ l.status }})</option>
@@ -123,15 +123,76 @@ onMounted(fetchLots)
 </template>
 
 <style scoped>
-.page { padding: 2rem; max-width: 1200px; margin: 0 auto; }
-h2 { margin: 0 0 1rem; }
-.success { color: #15803d; font-size: 0.875rem; background: #f0fdf4; padding: 8px 12px; border-radius: 6px; margin-bottom: 1rem; }
-.actions-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
-.action-card { background: white; border: 1px solid #e5e7eb; border-radius: 12px; padding: 1.25rem; display: flex; flex-direction: column; gap: 0.6rem; }
-h3 { margin: 0 0 0.25rem; font-size: 0.9rem; font-weight: 600; }
-select { padding: 7px 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 0.875rem; width: 100%; }
-button { padding: 8px; background: #1a2e1a; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.875rem; }
-button:disabled { opacity: 0.5; }
-.hint { color: #9ca3af; font-size: 0.78rem; }
-.section { margin-bottom: 2rem; }
+.page {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+h2 {
+  margin: 0 0 1rem;
+}
+
+.success {
+  color: #15803d;
+  font-size: 0.875rem;
+  background: #f0fdf4;
+  padding: 8px 12px;
+  border-radius: 6px;
+  margin-bottom: 1rem;
+}
+
+.actions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.action-card {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+h3 {
+  margin: 0 0 0.25rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+select {
+  padding: 7px 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  width: 100%;
+}
+
+button {
+  padding: 8px;
+  background: #1a2e1a;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.875rem;
+}
+
+button:disabled {
+  opacity: 0.5;
+}
+
+.hint {
+  color: #9ca3af;
+  font-size: 0.78rem;
+}
+
+.section {
+  margin-bottom: 2rem;
+}
 </style>

@@ -59,6 +59,11 @@ export const lotsService = {
   updateStatus: (id: string, status: LotStatus) =>
     api.patch<BackendLot>(`/lots/${id}/status`, { status }).then(mapLot),
 
-  updateZone: (id: string, zone_id: string) =>
-    api.patch<BackendLot>(`/lots/${id}/zone`, { zone_id }).then(mapLot),
+  updateZone: (id: string, zone_id: string, warehouse_id?: string) =>
+    api.patch<BackendLot>(`/lots/${id}/zone`, { zone_id, ...(warehouse_id && { warehouse_id }) }).then(mapLot),
+
+  stockIn: async (lot_id: string, zone_id: string, warehouse_id: string): Promise<Lot> => {
+    await api.patch<BackendLot>(`/lots/${lot_id}/status`, { status: 'stored' })
+    return api.patch<BackendLot>(`/lots/${lot_id}/zone`, { zone_id, warehouse_id }).then(mapLot)
+  },
 }

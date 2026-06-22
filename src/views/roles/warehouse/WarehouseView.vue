@@ -53,7 +53,7 @@ async function loadZones() {
 
 async function doStockIn() {
   if (!stockInLotId.value || !stockInZoneId.value || !autoFilters.value.warehouse_ids?.[0]) return
-  await movementsService.stockIn({ lot_id: stockInLotId.value, zone_id: stockInZoneId.value, warehouse_id: autoFilters.value.warehouse_ids[0] })
+  await lotsService.stockIn(stockInLotId.value, stockInZoneId.value, autoFilters.value.warehouse_ids[0])
   msg.value = 'Entrée enregistrée.'
   stockInLotId.value = ''; stockInZoneId.value = undefined
   fetchLots()
