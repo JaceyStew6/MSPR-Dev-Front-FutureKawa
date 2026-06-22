@@ -1,9 +1,14 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import { useAuthStore } from '@/stores/auth.store'
+import { storeToRefs } from 'pinia'
 import { lotsService } from '@/services/lots.service'
 import { readingsService } from '@/services/readings.service'
 import type { Lot, LotStatus } from '@/types/lot.types'
 import LotTable from '@/components/common/LotTable.vue'
+
+const authStore = useAuthStore()
+const { autoFilters } = storeToRefs(authStore)
 
 const lots = ref<Lot[]>([])
 const loading = ref(false)
@@ -20,7 +25,12 @@ const exporting = ref(false)
 async function fetchLots() {
   loading.value = true
   try {
-    const res = await lotsService.getLots({ sort: 'storage_date_asc', limit: 100 })
+    const res = await lotsService.getLots({
+      country_id: autoFilters.value.country_id,
+      sort: 'storage_date_asc',
+      limit: 100,
+      withReadings: true,
+    })
     lots.value = res.data
   } finally {
     loading.value = false
@@ -41,7 +51,7 @@ async function exportTraceability() {
   try {
     // Récupérer toutes les mesures du lot + infos lot
     const [lot, readings] = await Promise.all([
-      lotsService.getLot(exportLotId.value),
+      lotsService.getLot(exportLotId.value, autoFilters.value.country_id),
       readingsService.getReadings({ lot_id: exportLotId.value, granularity: 'raw' }),
     ])
 
