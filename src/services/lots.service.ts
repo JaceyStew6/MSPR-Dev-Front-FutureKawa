@@ -22,11 +22,47 @@ function mapLot(b: BackendLot): Lot {
     batch_number: b.idLot.substring(0, 8).toUpperCase(),
     farm_id: b.idExploitation ?? '',
     warehouse_id: b.idEntrepot,
-    zone_name: b.emplacement,
+    // emplacement peut contenir un UUID de zone ou un nom texte — résolu dans enrichWithNames
+    zone_id: b.emplacement,
     production_date: b.dateProduction ?? '',
     storage_date: b.dateStockage,
     status: (b.status?.toLowerCase() as LotStatus) ?? 'pending',
   }
+}
+
+async function enrichWithNames(lots: Lot[], country_id: string): Promise<Lot[]> {
+  const countryName = country_id.charAt(0).toUpperCase() + country_id.slice(1).toLowerCase()
+  const [warehouses, farms] = await Promise.all([
+    geoService.getWarehouses({ country_id }),
+    geoService.getFarms(country_id),
+  ])
+  const warehouseMap = new Map(warehouses.map((w) => [w.id, w.name]))
+  const farmMap = new Map(farms.map((f) => [f.id, f.name]))
+
+  const zoneLists = await Promise.all(
+    warehouses.map((w) => geoService.getZones(w.id, country_id))
+  )
+  const allZones = zoneLists.flat()
+  // Double index pour gérer les deux cas possibles de `emplacement` :
+  //   UUID  → lookup UUID→nom
+  //   nom texte → lookup nom→UUID (pour que le filtre zone_id fonctionne)
+  const zoneNameById = new Map(allZones.map((z) => [z.id, z.name]))
+  const zoneIdByName = new Map(allZones.map((z) => [z.name.toLowerCase(), z.id]))
+
+  return lots.map((l) => {
+    const raw = l.zone_id
+    const nameFromId = raw ? zoneNameById.get(raw) : undefined
+    const idFromName = raw ? zoneIdByName.get(raw.toLowerCase()) : undefined
+    return {
+      ...l,
+      country_id,
+      country_name: countryName,
+      warehouse_name: l.warehouse_id ? (warehouseMap.get(l.warehouse_id) ?? l.warehouse_name) : l.warehouse_name,
+      farm_name: l.farm_id ? (farmMap.get(l.farm_id) ?? l.farm_name) : l.farm_name,
+      zone_id: nameFromId ? raw : (idFromName ?? undefined),
+      zone_name: nameFromId ?? (idFromName ? raw : raw),
+    }
+  })
 }
 
 export const lotsService = {
@@ -34,27 +70,14 @@ export const lotsService = {
     const raw = await api.get<BackendLot[]>('/lots')
     let mapped = raw.map(mapLot)
 
-    // Enrich with display names when country is known (warehouse and farm names are not in the backend lot response)
     if (filters.country_id) {
-      const countryName = filters.country_id.charAt(0).toUpperCase() + filters.country_id.slice(1).toLowerCase()
-      const [warehouses, farms] = await Promise.all([
-        geoService.getWarehouses({ country_id: filters.country_id }),
-        geoService.getFarms(filters.country_id),
-      ])
-      const warehouseMap = new Map(warehouses.map((w) => [w.id, w.name]))
-      const farmMap = new Map(farms.map((f) => [f.id, f.name]))
-      mapped = mapped.map((l) => ({
-        ...l,
-        country_id: filters.country_id,
-        country_name: countryName,
-        warehouse_name: l.warehouse_id ? (warehouseMap.get(l.warehouse_id) ?? l.warehouse_name) : l.warehouse_name,
-        farm_name: l.farm_id ? (farmMap.get(l.farm_id) ?? l.farm_name) : l.farm_name,
-      }))
+      mapped = await enrichWithNames(mapped, filters.country_id)
     }
 
     // Client-side filtering (backend does not support filters)
     if (filters.status) mapped = mapped.filter((l) => l.status === filters.status)
     if (filters.warehouse_id) mapped = mapped.filter((l) => l.warehouse_id === filters.warehouse_id)
+    if (filters.zone_id) mapped = mapped.filter((l) => l.zone_id === filters.zone_id)
     if (filters.farm_id) mapped = mapped.filter((l) => l.farm_id === filters.farm_id)
 
     // FIFO sort by storage date if requested
@@ -69,8 +92,12 @@ export const lotsService = {
     return { data: mapped.slice(start, start + limit), total: mapped.length, page, limit }
   },
 
-  getLot: (id: string) =>
-    api.get<BackendLot>(`/lot/${id}`).then(mapLot),
+  getLot: async (id: string, country_id?: string): Promise<Lot> => {
+    const lot = await api.get<BackendLot>(`/lot/${id}`).then(mapLot)
+    if (!country_id) return lot
+    const [enriched] = await enrichWithNames([lot], country_id)
+    return enriched
+  },
 
   createLot: (payload: { production_date: string; farm_id: string; zone_id: string }) =>
     api.post<BackendLot>('/lots', payload).then(mapLot),

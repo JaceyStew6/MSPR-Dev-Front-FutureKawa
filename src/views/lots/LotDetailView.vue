@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { lotsService } from '@/services/lots.service'
+import { useAuthStore } from '@/stores/auth.store'
+import { storeToRefs } from 'pinia'
 import type { Lot } from '@/types/lot.types'
 import StatusBadge from '@/components/common/StatusBadge.vue'
 import ThresholdDot from '@/components/common/ThresholdDot.vue'
@@ -8,13 +10,15 @@ import ReadingChart from '@/components/charts/ReadingChart.vue'
 
 const props = defineProps<{ id: string }>()
 
+const { autoFilters } = storeToRefs(useAuthStore())
+
 const lot = ref<Lot | null>(null)
 const loading = ref(true)
 const error = ref('')
 
 onMounted(async () => {
   try {
-    lot.value = await lotsService.getLot(props.id)
+    lot.value = await lotsService.getLot(props.id, autoFilters.value.country_id)
   } catch {
     error.value = 'Lot introuvable'
   } finally {
