@@ -22,6 +22,7 @@ const props = defineProps<{
   lotId?: string
   zoneId?: string
   warehouseId?: string
+  countryId?: string
 }>()
 
 const granularity = ref<Granularity>('1h')
@@ -46,6 +47,7 @@ async function loadAndRender() {
       lot_id: props.lotId,
       zone_id: props.zoneId,
       warehouse_id: props.warehouseId,
+      country_id: props.countryId,
       granularity: granularity.value,
       from: from.value,
       to: to.value,
@@ -112,6 +114,7 @@ async function loadAndRender() {
 
 onMounted(() => nextTick(loadAndRender))
 watch([granularity, from, to], loadAndRender)
+watch(() => props.zoneId, loadAndRender)
 onUnmounted(() => chart?.destroy())
 </script>
 

@@ -16,6 +16,7 @@ export interface ReadingFilters {
   lot_id?: string
   zone_id?: string
   warehouse_id?: string
+  country_id?: string
   granularity?: Granularity
   from?: string
   to?: string

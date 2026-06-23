@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useFiltersStore } from '@/stores/filters.store'
 import { readingsService } from '@/services/readings.service'
 import { geoService } from '@/services/geo.service'
@@ -18,6 +18,10 @@ const summary = ref<WarehouseReadingSummary | null>(null)
 const selectedZoneId = ref<string | undefined>(undefined)
 const loading = ref(false)
 let pollTimer: ReturnType<typeof setInterval> | null = null
+
+const selectedCountryId = computed(
+  () => warehouses.value.find((w) => w.id === selectedWarehouseId.value)?.country_id,
+)
 
 async function loadWarehouses() {
   warehouses.value = await geoService.getWarehouses()
@@ -108,7 +112,7 @@ function selectZone(id: string) {
       <!-- Courbe de la zone sélectionnée -->
       <div v-if="selectedZoneId" class="chart-section">
         <h3>Historique - Zone sélectionnée</h3>
-        <ReadingChart :zone-id="selectedZoneId" />
+        <ReadingChart :zone-id="selectedZoneId" :country-id="selectedCountryId" />
       </div>
       <p v-else class="chart-hint">Cliquez sur une zone pour afficher son historique</p>
     </template>

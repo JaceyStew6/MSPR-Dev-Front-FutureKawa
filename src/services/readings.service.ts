@@ -47,6 +47,31 @@ function mapReading(b: BackendReading, index: number): Reading {
   }
 }
 
+function bucketKey(date: Date, granularity: string): string {
+  if (granularity === '1d') return date.toISOString().slice(0, 10)
+  if (granularity === '1h') return date.toISOString().slice(0, 13) + ':00:00'
+  return date.toISOString()
+}
+
+function applyGranularity(readings: Reading[], granularity: string): Reading[] {
+  if (granularity === 'raw' || readings.length === 0) return readings
+  const buckets = new Map<string, { temps: number[]; humids: number[]; date: string }>()
+  for (const r of readings) {
+    const key = bucketKey(new Date(r.recorded_at), granularity)
+    if (!buckets.has(key)) buckets.set(key, { temps: [], humids: [], date: key })
+    const b = buckets.get(key)!
+    b.temps.push(r.temperature)
+    b.humids.push(r.humidity)
+  }
+  return Array.from(buckets.values()).map((b, i) => ({
+    id: String(i),
+    temperature: b.temps.reduce((s, v) => s + v, 0) / b.temps.length,
+    humidity: b.humids.reduce((s, v) => s + v, 0) / b.humids.length,
+    recorded_at: b.date,
+    threshold_status: 'ok' as const,
+  }))
+}
+
 export const readingsService = {
   getLatestReading: async (lot_id: string): Promise<BackendLotReading | null> => {
     try {
@@ -70,11 +95,12 @@ export const readingsService = {
     if (filters.zone_id) {
       const from = filters.from ? `${filters.from}T00:00:00` : '2020-01-01T00:00:00'
       const to = filters.to ? `${filters.to}T23:59:59` : new Date().toISOString().slice(0, 19)
+      const pays = filters.country_id ?? ''
       try {
-        const readings = await api.get<BackendReading[]>(
-          `/readings/${filters.zone_id}/?pays=&startDate=${from}&endDate=${to}`,
+        const raw = await api.get<BackendReading[]>(
+          `/readings/${filters.zone_id}/?pays=${pays}&startDate=${from}&endDate=${to}`,
         )
-        return readings.map(mapReading)
+        return applyGranularity(raw.map(mapReading), filters.granularity ?? 'raw')
       } catch {
         return []
       }
