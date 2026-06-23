@@ -60,7 +60,7 @@ async function handleLogout() {
     </ul>
 
     <div class="nav-right">
-      <AlertBadge v-if="role === 'warehouse_manager' || role === 'farm_manager'" />
+      <AlertBadge v-if="role === 'warehouse_manager'" />
       <span class="user-info">{{ user?.name }} · <em>{{ user?.role }}</em></span>
       <button class="btn-logout" @click="handleLogout">Déconnexion</button>
     </div>

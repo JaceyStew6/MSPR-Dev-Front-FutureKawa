@@ -35,7 +35,7 @@ const quickLinks = computed(() => {
 <template>
   <div class="dashboard">
     <div class="hero">
-      <h2>Bonjour, {{ user?.name }} 👋</h2>
+      <h2>Bonjour, {{ user?.name }}</h2>
       <p class="role-label">{{ roleLabel[role ?? ''] ?? role }}</p>
     </div>
 

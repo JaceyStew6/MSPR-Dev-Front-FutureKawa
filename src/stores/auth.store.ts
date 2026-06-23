@@ -30,10 +30,24 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
+  async function enrichFarmId(u: User): Promise<User> {
+    if (u.role !== 'farm_manager' || !u.country_id || u.farm_id) return u
+    try {
+      const farms = await geoService.getFarms(u.country_id)
+      return farms.length ? { ...u, farm_id: farms[0].id } : u
+    } catch {
+      return u
+    }
+  }
+
+  async function enrich(u: User): Promise<User> {
+    return enrichFarmId(await enrichWarehouseIds(u))
+  }
+
   async function login(payload: LoginPayload) {
     const res = await authService.login(payload)
     token.value = res.token
-    user.value = await enrichWarehouseIds(res.user)
+    user.value = await enrich(res.user)
     setToken(res.token)
   }
 
@@ -51,7 +65,7 @@ export const useAuthStore = defineStore('auth', () => {
 
   async function fetchMe() {
     const me = await authService.me()
-    user.value = await enrichWarehouseIds(me)
+    user.value = await enrich(me)
   }
 
   function init() {

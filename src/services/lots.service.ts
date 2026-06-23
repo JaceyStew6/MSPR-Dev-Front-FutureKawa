@@ -147,8 +147,22 @@ export const lotsService = {
     return enriched
   },
 
-  createLot: (payload: { production_date: string; farm_id: string; zone_id: string }) =>
-    api.post<BackendLot>('/lots', payload).then(mapLot),
+  createLot: (payload: {
+    farm_id: string
+    pays: string
+    status: string
+    quantite: number
+    caracteristique: number
+  }): Promise<void> => {
+    const qs = new URLSearchParams({ pays: payload.pays }).toString()
+    return api.post<void>(`/lot?${qs}`, {
+      idExploitation: payload.farm_id,
+      status: payload.status,
+      quantite: payload.quantite,
+      caracteristique: payload.caracteristique,
+      dateProduction: new Date().toISOString().split('T')[0],
+    })
+  },
 
   updateStatus: (id: string, status: LotStatus) =>
     api.patch<BackendLot>(`/lots/${id}/status`, { status }).then(mapLot),

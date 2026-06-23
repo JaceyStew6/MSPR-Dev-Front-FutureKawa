@@ -69,7 +69,12 @@ watch(page, fetchLots)
       </select>
     </div>
 
-    <LotTable :lots="lots" :loading="loading" />
+    <LotTable
+      :lots="lots"
+      :loading="loading"
+      :show-zone="authStore.role !== 'farm_manager'"
+      :show-readings="authStore.role !== 'farm_manager'"
+    />
     <Pagination :page="page" :total="total" :limit="limit" @change="page = $event" />
   </div>
 </template>

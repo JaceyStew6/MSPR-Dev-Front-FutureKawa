@@ -83,24 +83,16 @@ const TYPE_LABEL: Record<AlertType, string> = {
     <div v-else-if="fetchError" class="error-banner">{{ fetchError }}</div>
 
     <ul v-else class="alert-list">
-      <li
-        v-for="alert in alerts"
-        :key="alert.id"
-        class="alert-item"
-        :class="{ 'alert-item--read': alert.is_read }"
-      >
+      <li v-for="alert in alerts" :key="alert.id" class="alert-item" :class="{ 'alert-item--read': alert.is_read }">
         <div class="alert-meta">
           <span class="alert-type" :class="`alert-type--${alert.type}`">
             {{ TYPE_LABEL[alert.type] }}
           </span>
-          <span class="alert-loc">{{ alert.country_name }}<span v-if="alert.warehouse_name"> · {{ alert.warehouse_name }}</span></span>
+          <span v-if="alert.zone_name || alert.zone_id" class="alert-loc">Zone : {{ alert.zone_name ?? alert.zone_id }}</span>
         </div>
         <p class="alert-message">{{ alert.message }}</p>
         <div class="alert-footer">
           <span class="alert-date">{{ new Date(alert.created_at).toLocaleString('fr-FR') }}</span>
-          <span v-if="alert.lot_batch_number">
-            <RouterLink :to="`/lots/${alert.lot_id}`" class="lot-link">Lot {{ alert.lot_batch_number }}</RouterLink>
-          </span>
           <button v-if="!alert.is_read" class="btn-read" @click="markRead(alert.id)">
             Marquer lu
           </button>
@@ -115,14 +107,62 @@ const TYPE_LABEL: Record<AlertType, string> = {
 </template>
 
 <style scoped>
-.page { padding: 2rem; max-width: 900px; margin: 0 auto; }
-h2 { margin: 0 0 1.5rem; }
-.filters-bar { display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap; }
-.checkbox-label { display: flex; align-items: center; gap: 6px; font-size: 0.875rem; cursor: pointer; }
-select { padding: 6px 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 0.875rem; }
-.loading { text-align: center; padding: 2rem; color: #6b7280; }
-.error-banner { padding: 1rem 1.25rem; background: #fee2e2; color: #991b1b; border-radius: 8px; font-size: 0.875rem; }
-.alert-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.75rem; }
+.page {
+  padding: 2rem;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+h2 {
+  margin: 0 0 1.5rem;
+}
+
+.filters-bar {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
+select {
+  padding: 6px 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 0.875rem;
+}
+
+.loading {
+  text-align: center;
+  padding: 2rem;
+  color: #6b7280;
+}
+
+.error-banner {
+  padding: 1rem 1.25rem;
+  background: #fee2e2;
+  color: #991b1b;
+  border-radius: 8px;
+  font-size: 0.875rem;
+}
+
+.alert-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
 .alert-item {
   background: white;
   border: 1px solid #e5e7eb;
@@ -132,8 +172,17 @@ select { padding: 6px 10px; border: 1px solid #d1d5db; border-radius: 6px; font-
   flex-direction: column;
   gap: 0.5rem;
 }
-.alert-item--read { opacity: 0.6; }
-.alert-meta { display: flex; align-items: center; gap: 0.75rem; }
+
+.alert-item--read {
+  opacity: 0.6;
+}
+
+.alert-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
 .alert-type {
   font-size: 0.72rem;
   font-weight: 700;
@@ -141,15 +190,55 @@ select { padding: 6px 10px; border: 1px solid #d1d5db; border-radius: 6px; font-
   padding: 2px 8px;
   border-radius: 999px;
 }
-.alert-type--threshold { background: #fee2e2; color: #991b1b; }
-.alert-type--expiry    { background: #fef3c7; color: #92400e; }
-.alert-type--fifo      { background: #ede9fe; color: #5b21b6; }
-.alert-loc { font-size: 0.8rem; color: #6b7280; }
-.alert-message { margin: 0; font-size: 0.9rem; color: #111827; }
-.alert-footer { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
-.alert-date { font-size: 0.78rem; color: #9ca3af; }
-.lot-link { font-size: 0.8rem; color: #15803d; text-decoration: none; }
-.lot-link:hover { text-decoration: underline; }
+
+.alert-type--threshold {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.alert-type--expiry {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.alert-type--fifo {
+  background: #ede9fe;
+  color: #5b21b6;
+}
+
+.alert-loc {
+  font-size: 0.8rem;
+  color: #6b7280;
+}
+
+.alert-message {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #111827;
+}
+
+.alert-footer {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.alert-date {
+  font-size: 0.78rem;
+  color: #9ca3af;
+}
+
+.lot-link {
+  font-size: 0.8rem;
+  color: #15803d;
+  text-decoration: none;
+}
+
+.lot-link:hover {
+  text-decoration: underline;
+}
+
 .btn-read {
   padding: 3px 10px;
   border: 1px solid #d1d5db;
@@ -158,7 +247,19 @@ select { padding: 6px 10px; border: 1px solid #d1d5db; border-radius: 6px; font-
   cursor: pointer;
   font-size: 0.78rem;
 }
-.btn-read:hover { background: #f0fdf4; }
-.read-label { font-size: 0.78rem; color: #15803d; }
-.empty { text-align: center; color: #9ca3af; padding: 2rem; }
+
+.btn-read:hover {
+  background: #f0fdf4;
+}
+
+.read-label {
+  font-size: 0.78rem;
+  color: #15803d;
+}
+
+.empty {
+  text-align: center;
+  color: #9ca3af;
+  padding: 2rem;
+}
 </style>

@@ -18,8 +18,7 @@ const zones = ref<Zone[]>([])
 
 onMounted(async () => {
   countries.value = await geoService.getCountries()
-  // Pré-remplir depuis autoFilters si rôle limité
-  if (autoFilters.value.country_id) {
+  if (autoFilters.value.country_id && !countryId.value) {
     filtersStore.setCountry(autoFilters.value.country_id)
   }
 })
@@ -28,11 +27,19 @@ watch(countryId, async (id) => {
   farms.value = id ? await geoService.getFarms(id) : []
   warehouses.value = id ? await geoService.getWarehouses({ country_id: id }) : []
   zones.value = []
-})
+}, { immediate: true })
 
 watch(warehouseId, async (id) => {
   zones.value = id ? await geoService.getZones(id, countryId.value) : []
-})
+}, { immediate: true })
+
+function resetFilters() {
+  if (autoFilters.value.country_id) {
+    filtersStore.setCountry(autoFilters.value.country_id)
+  } else {
+    filtersStore.reset()
+  }
+}
 </script>
 
 <template>
@@ -73,7 +80,7 @@ watch(warehouseId, async (id) => {
       <option v-for="z in zones" :key="z.id" :value="z.id">{{ z.name }}</option>
     </select>
 
-    <button class="btn-reset" @click="filtersStore.reset()">Réinitialiser</button>
+    <button class="btn-reset" @click="resetFilters()">Réinitialiser</button>
   </div>
 </template>
 

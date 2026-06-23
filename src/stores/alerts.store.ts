@@ -32,7 +32,11 @@ export const useAlertsStore = defineStore('alerts', () => {
   }
 
   async function markAsRead(id: string) {
-    await alertsService.markAsRead(id)
+    try {
+      await alertsService.markAsRead(id)
+    } catch {
+      // endpoint absent du backend — mise à jour locale uniquement
+    }
     const alert = alerts.value.find((a) => a.id === id)
     if (alert) alert.is_read = true
   }
