@@ -1,4 +1,5 @@
 export type MovementType = 'stock_in' | 'stock_out' | 'zone_transfer'
+export type StockOutType = 'shipment' | 'transfer' | 'loss'
 
 export interface Movement {
   id: string
@@ -24,8 +25,13 @@ export interface StockInPayload {
 
 export interface StockOutPayload {
   lot_id: string
-  warehouse_id?: string
-  reason?: string
+  pays: string
+  type: StockOutType
+}
+
+export interface StockOutResponse {
+  idHistorique: string
+  status: string
 }
 
 export interface ZoneTransferPayload {

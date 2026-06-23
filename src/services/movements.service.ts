@@ -1,5 +1,5 @@
 import { api } from './api'
-import type { Movement, StockInPayload, StockOutPayload } from '@/types/movement.types'
+import type { Movement, StockInPayload, StockOutPayload, StockOutResponse } from '@/types/movement.types'
 import type { PaginatedResponse } from '@/types/lot.types'
 
 export const movementsService = {
@@ -16,6 +16,9 @@ export const movementsService = {
   stockIn: (payload: StockInPayload) =>
     api.post<Movement>('/movements/stock-in', payload),
 
-  stockOut: (payload: StockOutPayload) =>
-    api.post<Movement>('/movements/stock-out', payload),
+  // POST /mouvements/stockout?idLot=...&pays=...
+  stockOut: (payload: StockOutPayload): Promise<StockOutResponse> => {
+    const qs = new URLSearchParams({ idLot: payload.lot_id, pays: payload.pays }).toString()
+    return api.post<StockOutResponse>(`/mouvements/stockout?${qs}`, {})
+  },
 }

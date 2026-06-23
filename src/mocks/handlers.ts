@@ -225,6 +225,14 @@ export async function mockFetch(url: string, options: RequestInit = {}): Promise
 
   // ── Mouvements ────────────────────────────────────────────────────────────
 
+  if (method === 'POST' && path.startsWith('/mouvements/stockout')) {
+    const qs = parseQs(path)
+    const lot = LOTS.find((l) => String(l.id) === qs.idLot)
+    if (!lot) return new Response(JSON.stringify({ message: 'Lot introuvable' }), { status: 404 })
+    lot.status = 'shipped'
+    return ok({ idHistorique: `mock-hist-${Date.now()}`, status: 'shipped' })
+  }
+
   if (method === 'POST' && path === '/movements/stock-in') {
     const newId = Math.max(...MOVEMENTS.map((m) => m.id)) + 1
     const lot = LOTS.find((l) => l.id === body.lot_id)
