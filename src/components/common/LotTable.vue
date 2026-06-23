@@ -1,12 +1,22 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import type { Lot } from '@/types/lot.types'
 import StatusBadge from './StatusBadge.vue'
 import ThresholdDot from './ThresholdDot.vue'
 
-defineProps<{
+const props = defineProps<{
   lots: Lot[]
   loading?: boolean
+  showZone?: boolean
+  showReadings?: boolean
 }>()
+
+const colCount = computed(() => {
+  let n = 8
+  if (props.showZone !== false) n++
+  if (props.showReadings !== false) n++
+  return n
+})
 
 function formatDate(d: string | undefined) {
   if (!d) return '-'
@@ -24,11 +34,11 @@ function formatDate(d: string | undefined) {
           <th>Pays</th>
           <th>Exploitation</th>
           <th>Entrepôt</th>
-          <th>Zone</th>
+          <th v-if="showZone !== false">Zone</th>
           <th>Date production</th>
           <th>Date stockage ↑ (FIFO)</th>
           <th>Statut</th>
-          <th>Dernière mesure</th>
+          <th v-if="showReadings !== false">Dernière mesure</th>
           <th></th>
         </tr>
       </thead>
@@ -38,11 +48,13 @@ function formatDate(d: string | undefined) {
           <td>{{ lot.country_name ?? lot.country_id }}</td>
           <td>{{ lot.farm_name ?? lot.farm_id }}</td>
           <td>{{ lot.warehouse_name ?? '-' }}</td>
-          <td>{{ lot.zone_name ?? '-' }}</td>
+          <td v-if="showZone !== false">{{ lot.zone_name ?? '-' }}</td>
           <td>{{ formatDate(lot.production_date) }}</td>
           <td>{{ formatDate(lot.storage_date) }}</td>
-          <td><StatusBadge :status="lot.status" /></td>
           <td>
+            <StatusBadge :status="lot.status" />
+          </td>
+          <td v-if="showReadings !== false">
             <template v-if="lot.latest_reading">
               <ThresholdDot :status="lot.latest_reading.threshold_status" />
               {{ lot.latest_reading.temperature.toFixed(1) }}°C
@@ -55,7 +67,7 @@ function formatDate(d: string | undefined) {
           </td>
         </tr>
         <tr v-if="lots.length === 0">
-          <td colspan="10" class="empty">Aucun lot trouvé</td>
+          <td :colspan="colCount" class="empty">Aucun lot trouvé</td>
         </tr>
       </tbody>
     </table>
@@ -63,9 +75,22 @@ function formatDate(d: string | undefined) {
 </template>
 
 <style scoped>
-.table-wrapper { overflow-x: auto; }
-.loading { padding: 2rem; text-align: center; color: #6b7280; }
-.lot-table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+.table-wrapper {
+  overflow-x: auto;
+}
+
+.loading {
+  padding: 2rem;
+  text-align: center;
+  color: #6b7280;
+}
+
+.lot-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
 .lot-table th {
   background: #f9fafb;
   padding: 10px 12px;
@@ -75,16 +100,40 @@ function formatDate(d: string | undefined) {
   border-bottom: 2px solid #e5e7eb;
   white-space: nowrap;
 }
-.lot-table td { padding: 10px 12px; border-bottom: 1px solid #f3f4f6; vertical-align: middle; }
-.lot-table tr:hover td { background: #f9fafb; }
-.batch { font-family: monospace; font-weight: 600; }
-.no-data { color: #9ca3af; }
-.empty { text-align: center; color: #9ca3af; padding: 2rem; }
+
+.lot-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid #f3f4f6;
+  vertical-align: middle;
+}
+
+.lot-table tr:hover td {
+  background: #f9fafb;
+}
+
+.batch {
+  font-family: monospace;
+  font-weight: 600;
+}
+
+.no-data {
+  color: #9ca3af;
+}
+
+.empty {
+  text-align: center;
+  color: #9ca3af;
+  padding: 2rem;
+}
+
 .btn-detail {
   color: #15803d;
   text-decoration: none;
   font-weight: 500;
   font-size: 0.8rem;
 }
-.btn-detail:hover { text-decoration: underline; }
+
+.btn-detail:hover {
+  text-decoration: underline;
+}
 </style>

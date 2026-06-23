@@ -25,7 +25,12 @@ const stockOutWarehouseId = ref<string | null>(null)
 async function fetchLots() {
   loading.value = true
   try {
-    const res = await lotsService.getLots({ farm_id: autoFilters.value.farm_id, sort: 'storage_date_asc', limit: 50 })
+    const res = await lotsService.getLots({
+      farm_id: autoFilters.value.farm_id,
+      country_id: autoFilters.value.country_id,
+      sort: 'storage_date_asc',
+      limit: 50,
+    })
     lots.value = res.data
   } finally {
     loading.value = false
@@ -104,7 +109,7 @@ onMounted(() => {
     <!-- Liste lots -->
     <div class="section">
       <h3>Statut de l'exploitation</h3>
-      <LotTable :lots="lots" :loading="loading" />
+      <LotTable :lots="lots" :loading="loading" :show-zone="false" :show-readings="false" />
     </div>
   </div>
 </template>
