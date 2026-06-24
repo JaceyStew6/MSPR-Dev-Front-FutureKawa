@@ -25,7 +25,7 @@ export const useAlertsStore = defineStore('alerts', () => {
       })
       alerts.value = res.data
     } catch {
-      // silent — don't interrupt the UX during polling
+      // silent - don't interrupt the UX during polling
     } finally {
       loading.value = false
     }
@@ -35,7 +35,7 @@ export const useAlertsStore = defineStore('alerts', () => {
     try {
       await alertsService.markAsRead(id)
     } catch {
-      // endpoint absent du backend — mise à jour locale uniquement
+      // endpoint absent du backend - mise à jour locale uniquement
     }
     const alert = alerts.value.find((a) => a.id === id)
     if (alert) alert.is_read = true

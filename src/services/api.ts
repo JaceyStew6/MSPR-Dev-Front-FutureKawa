@@ -3,7 +3,7 @@ import { mockFetch } from '@/mocks/handlers'
 const BASE_URL = import.meta.env.VITE_API_BASE_URL as string
 const IS_MOCK = import.meta.env.VITE_MOCK === 'true'
 
-// Auth endpoints are always mocked — the backend exposes no auth API.
+// Auth endpoints are always mocked - the backend exposes no auth API.
 // Use a URL the mock handler can parse (it splits on "/api" to extract the path).
 const AUTH_PATHS = new Set(['/auth/login', '/auth/logout', '/auth/me'])
 

@@ -75,7 +75,7 @@ export const alertsService = {
     return { data: mapped.slice(start, start + limit), total: mapped.length, page, limit }
   },
 
-  // PATCH not covered by the GET-only swagger — kept for compatibility
+  // PATCH not covered by the GET-only swagger - kept for compatibility
   markAsRead: (id: string) =>
     api.patch<Alert>(`/alerts/${id}/read`, {}),
 }

@@ -3,7 +3,7 @@ import type { Movement, StockInPayload, StockOutPayload, StockOutResponse } from
 import type { PaginatedResponse } from '@/types/lot.types'
 
 export const movementsService = {
-  // No GET /movements endpoint in the backend — returns empty to avoid errors
+  // No GET /movements endpoint in the backend - returns empty to avoid errors
   getMovements: async (_params?: {
     lot_id?: string
     warehouse_id?: string

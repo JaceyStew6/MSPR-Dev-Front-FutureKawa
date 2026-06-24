@@ -213,7 +213,7 @@ export async function mockFetch(url: string, options: RequestInit = {}): Promise
       String((a as Record<string, unknown>).warehouse_id) === qs.idEntrepot
     )
     filtered.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-    // Retourne le format BackendAlert — mapAlert() dans le service se charge de la conversion
+    // Retourne le format BackendAlert - mapAlert() dans le service se charge de la conversion
     return ok(filtered.map((a) => ({
       idAlerte: String(a.id),
       typeAlerte: a.type,

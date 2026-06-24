@@ -23,7 +23,7 @@ function mapLot(b: BackendLot): Lot {
     batch_number: b.idLot.substring(0, 8).toUpperCase(),
     farm_id: b.idExploitation ?? '',
     warehouse_id: b.idEntrepot,
-    // emplacement peut contenir un UUID de zone ou un nom texte — résolu dans enrichWithNames
+    // emplacement peut contenir un UUID de zone ou un nom texte - résolu dans enrichWithNames
     zone_id: b.emplacement,
     production_date: b.dateProduction ?? '',
     storage_date: b.dateStockage,
@@ -31,21 +31,16 @@ function mapLot(b: BackendLot): Lot {
   }
 }
 
-// country_id est optionnel : s'il est absent, on infère le pays depuis l'entrepôt du lot
+// country_id est un fallback quand le lot n'a pas d'entrepôt connu
 async function enrichWithNames(lots: Lot[], country_id?: string): Promise<Lot[]> {
-  // Fetch warehouses — scoped si country_id fourni, tous les pays sinon
-  const warehouses = await geoService.getWarehouses(country_id ? { country_id } : undefined)
+  const warehouses = await geoService.getWarehouses()
   const warehouseMap = new Map(warehouses.map((w) => [w.id, w]))
 
-  // Pays effectivement présents dans les lots (via leur entrepôt)
   const neededCountries = new Set<string>()
-  if (country_id) {
-    neededCountries.add(country_id)
-  } else {
-    for (const l of lots) {
-      const wh = l.warehouse_id ? warehouseMap.get(l.warehouse_id) : undefined
-      if (wh?.country_id) neededCountries.add(wh.country_id)
-    }
+  for (const l of lots) {
+    const wh = l.warehouse_id ? warehouseMap.get(l.warehouse_id) : undefined
+    const lotCountry = wh?.country_id ?? country_id ?? l.country_id
+    if (lotCountry) neededCountries.add(lotCountry)
   }
 
   // Exploitations par pays
@@ -68,7 +63,7 @@ async function enrichWithNames(lots: Lot[], country_id?: string): Promise<Lot[]>
 
   return lots.map((l) => {
     const warehouse = l.warehouse_id ? warehouseMap.get(l.warehouse_id) : undefined
-    const lotCountry = country_id ?? warehouse?.country_id ?? ''
+    const lotCountry = warehouse?.country_id ?? country_id ?? l.country_id ?? ''
     const countryName = lotCountry
       ? lotCountry.charAt(0).toUpperCase() + lotCountry.slice(1).toLowerCase()
       : l.country_name
@@ -95,16 +90,13 @@ export const lotsService = {
   getLots: async (filters: LotFilters = {}): Promise<PaginatedResponse<Lot>> => {
     const raw = await api.get<BackendLot[]>('/lots')
     let mapped = raw.map(mapLot)
-
-    // Enrichir les noms si country_id fourni OU si withReadings demandé (pour les rôles sans pays)
-    if (filters.country_id || filters.withReadings) {
-      mapped = await enrichWithNames(mapped, filters.country_id)
-    }
+    mapped = await enrichWithNames(mapped, filters.country_id)
 
     // Appliquer les overrides locaux avant le filtrage par statut
     mapped = applyStatusOverrides(mapped)
 
     // Filtrage client (le backend ne supporte pas les filtres)
+    if (filters.country_id) mapped = mapped.filter((l) => l.country_id?.toLowerCase() === filters.country_id!.toLowerCase())
     if (filters.status) mapped = mapped.filter((l) => l.status === filters.status)
     if (filters.warehouse_id) mapped = mapped.filter((l) => l.warehouse_id === filters.warehouse_id)
     if (filters.zone_id) mapped = mapped.filter((l) => l.zone_id === filters.zone_id)
@@ -126,14 +118,14 @@ export const lotsService = {
           const r = latestReadings[i]
           return r
             ? {
-                ...l,
-                latest_reading: {
-                  temperature: r.temperature,
-                  humidity: r.humidite,
-                  recorded_at: r.dateMesure,
-                  threshold_status: 'ok' as const,
-                },
-              }
+              ...l,
+              latest_reading: {
+                temperature: r.temperature,
+                humidity: r.humidite,
+                recorded_at: r.dateMesure,
+                threshold_status: 'ok' as const,
+              },
+            }
             : l
         }),
         total: mapped.length,
