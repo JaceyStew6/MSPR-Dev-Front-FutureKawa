@@ -158,22 +158,22 @@ export async function mockFetch(url: string, options: RequestInit = {}): Promise
     return ok(newLot, 201)
   }
 
-  if (method === 'PATCH' && path.match(/^\/lots\/\d+\/status$/)) {
-    const id = Number(path.split('/')[2])
-    const lot = LOTS.find((l) => l.id === id)
+  if (method === 'PUT' && path.match(/^\/lot\/[^/]+\/status$/)) {
+    const rawId = path.split('/')[2]
+    const lot = LOTS.find((l) => String(l.id) === rawId)
     if (!lot) return new Response(JSON.stringify({ message: 'Lot introuvable' }), { status: 404 })
     lot.status = body.status as typeof lot.status
-    return ok(lot)
+    return ok({ idLot: String(lot.id), status: lot.status })
   }
 
-  if (method === 'PATCH' && path.match(/^\/lots\/\d+\/zone$/)) {
-    const id = Number(path.split('/')[2])
-    const lot = LOTS.find((l) => l.id === id)
+  if (method === 'PUT' && path.match(/^\/lot\/[^/]+\/zones$/)) {
+    const rawId = path.split('/')[2]
+    const lot = LOTS.find((l) => String(l.id) === rawId)
     if (!lot) return new Response(JSON.stringify({ message: 'Lot introuvable' }), { status: 404 })
-    const zone = Object.values(ZONES).flat().find((z) => z.id === body.zone_id)
-    lot.zone_id = body.zone_id
+    const zone = Object.values(ZONES).flat().find((z) => String(z.id) === String(body.idZone))
+    lot.zone_id = body.idZone
     lot.zone_name = zone?.name
-    return ok(lot)
+    return ok({ idLot: String(lot.id), status: lot.status })
   }
 
   // ── Readings ──────────────────────────────────────────────────────────────

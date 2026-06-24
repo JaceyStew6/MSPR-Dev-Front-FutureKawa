@@ -88,8 +88,17 @@ export const readingsService = {
   getReadings: async (filters: ReadingFilters = {}): Promise<Reading[]> => {
     // Readings by lot → GET /lot/{idLot}/mesures
     if (filters.lot_id) {
-      const readings = await api.get<BackendLotReading[]>(`/lot/${filters.lot_id}/mesures`)
-      return readings.map(mapLotReading)
+      const raw = await api.get<BackendLotReading[]>(`/lot/${filters.lot_id}/mesures`)
+      let mapped = raw.map(mapLotReading)
+      if (filters.from) {
+        const fromDate = new Date(`${filters.from}T00:00:00`)
+        mapped = mapped.filter((r) => new Date(r.recorded_at) >= fromDate)
+      }
+      if (filters.to) {
+        const toDate = new Date(`${filters.to}T23:59:59`)
+        mapped = mapped.filter((r) => new Date(r.recorded_at) <= toDate)
+      }
+      return applyGranularity(mapped, filters.granularity ?? 'raw')
     }
     // Readings by zone → GET /readings/{idZone}/?pays=&startDate=...&endDate=...
     if (filters.zone_id) {

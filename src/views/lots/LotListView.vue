@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch, onMounted } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { useFiltersStore } from '@/stores/filters.store'
 import { useAuthStore } from '@/stores/auth.store'
 import { lotsService } from '@/services/lots.service'
@@ -19,7 +19,13 @@ const total = ref(0)
 const page = ref(1)
 const limit = 20
 const loading = ref(false)
-const statusFilter = ref<LotStatus | ''>('')
+const statusFilter = ref('')
+const availableStatuses = computed(() => [...new Set(lots.value.map((l) => l.status))])
+const STATUS_LABELS: Record<string, string> = {
+  pending: 'En attente', stored: 'Stocké', compliant: 'Conforme',
+  alert: 'Alerte', blocked: 'Bloqué', shipped: 'Expédié',
+}
+function statusLabel(s: string) { return STATUS_LABELS[s.toLowerCase()] ?? s }
 
 async function fetchLots() {
   loading.value = true
@@ -60,12 +66,7 @@ watch(page, fetchLots)
       <CascadeFilter />
       <select v-model="statusFilter" class="status-filter">
         <option value="">- Tous les statuts -</option>
-        <option value="pending">En attente</option>
-        <option value="stored">Stocké</option>
-        <option value="compliant">Conforme</option>
-        <option value="alert">Alerte</option>
-        <option value="blocked">Bloqué</option>
-        <option value="shipped">Expédié</option>
+        <option v-for="s in availableStatuses" :key="s" :value="s">{{ statusLabel(s) }}</option>
       </select>
     </div>
 

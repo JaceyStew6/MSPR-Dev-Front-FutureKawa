@@ -1,22 +1,25 @@
 <script setup lang="ts">
-import type { LotStatus } from '@/types/lot.types'
+import { computed } from 'vue'
 
-const props = defineProps<{ status: LotStatus }>()
+const props = defineProps<{ status: string }>()
 
-const CONFIG: Record<LotStatus, { label: string; class: string }> = {
-  pending:   { label: 'En attente',   class: 'badge--gray' },
-  stored:    { label: 'Stocké',       class: 'badge--blue' },
-  compliant: { label: 'Conforme',     class: 'badge--green' },
-  alert:     { label: 'Alerte',       class: 'badge--orange' },
-  blocked:   { label: 'Bloqué',       class: 'badge--red' },
-  shipped:   { label: 'Expédié',      class: 'badge--purple' },
+const CONFIG: Record<string, { label: string; class: string }> = {
+  pending:   { label: 'En attente', class: 'badge--gray' },
+  stored:    { label: 'Stocké',     class: 'badge--blue' },
+  compliant: { label: 'Conforme',   class: 'badge--green' },
+  alert:     { label: 'Alerte',     class: 'badge--orange' },
+  blocked:   { label: 'Bloqué',     class: 'badge--red' },
+  shipped:   { label: 'Expédié',    class: 'badge--purple' },
 }
+
+const config = computed(() => {
+  const key = props.status?.toLowerCase() ?? ''
+  return CONFIG[key] ?? { label: props.status, class: 'badge--gray' }
+})
 </script>
 
 <template>
-  <span class="badge" :class="CONFIG[props.status].class">
-    {{ CONFIG[props.status].label }}
-  </span>
+  <span class="badge" :class="config.class">{{ config.label }}</span>
 </template>
 
 <style scoped>

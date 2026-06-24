@@ -4,8 +4,15 @@ import { useAuthStore } from '@/stores/auth.store'
 import { storeToRefs } from 'pinia'
 import { lotsService } from '@/services/lots.service'
 import { readingsService } from '@/services/readings.service'
-import type { Lot, LotStatus } from '@/types/lot.types'
+import { saveStatusOverride } from '@/services/status-overrides'
+import type { Lot } from '@/types/lot.types'
 import LotTable from '@/components/common/LotTable.vue'
+
+const STATUS_LABELS: Record<string, string> = {
+  pending: 'En attente', stored: 'Stocké', compliant: 'Conforme',
+  alert: 'Alerte', blocked: 'Bloqué', shipped: 'Expédié',
+}
+function statusLabel(s: string) { return STATUS_LABELS[s.toLowerCase()] ?? s }
 
 const authStore = useAuthStore()
 const { autoFilters } = storeToRefs(authStore)
@@ -13,10 +20,12 @@ const { autoFilters } = storeToRefs(authStore)
 const lots = ref<Lot[]>([])
 const loading = ref(false)
 const msg = ref('')
+const msgError = ref(false)
 
 // Mise à jour statut
 const statusLotId = ref<string | null>(null)
-const newStatus = ref<LotStatus>('compliant')
+const newStatus = ref('')
+const availableStatuses = ['compliant', 'alert', 'blocked', 'shipped']
 
 // Export tracabilité
 const exportLotId = ref<string | null>(null)
@@ -38,11 +47,26 @@ async function fetchLots() {
 }
 
 async function doStatusUpdate() {
-  if (!statusLotId.value) return
-  await lotsService.updateStatus(statusLotId.value, newStatus.value)
-  msg.value = `Statut du lot mis à jour : ${newStatus.value}`
-  statusLotId.value = null
-  fetchLots()
+  if (!statusLotId.value || !newStatus.value) return
+  const id = statusLotId.value
+  const status = newStatus.value
+  const lot = lots.value.find((l) => l.id === id)
+  const pays = lot?.country_id ?? autoFilters.value.country_id
+  if (!pays) {
+    msg.value = 'Erreur : pays non déterminé pour ce lot.'
+    return
+  }
+  try {
+    await lotsService.updateStatus(id, status, pays)
+    saveStatusOverride(id, status)
+    if (lot) lot.status = status
+    msg.value = `Statut mis à jour : ${statusLabel(status)}`
+    msgError.value = false
+    statusLotId.value = null
+  } catch (e) {
+    msg.value = `Erreur : ${e instanceof Error ? e.message : 'Échec de la mise à jour'}`
+    msgError.value = true
+  }
 }
 
 async function exportTraceability() {
@@ -87,7 +111,7 @@ onMounted(fetchLots)
 <template>
   <div class="page">
     <h2>Équipe Qualité</h2>
-    <p v-if="msg" class="success">{{ msg }}</p>
+    <p v-if="msg" :class="msgError ? 'error' : 'success'">{{ msg }}</p>
 
     <div class="actions-grid">
       <!-- Mise à jour statut -->
@@ -98,11 +122,10 @@ onMounted(fetchLots)
           <option v-for="l in lots" :key="l.id" :value="l.id">{{ l.batch_number }} ({{ l.status }})</option>
         </select>
         <select v-model="newStatus">
-          <option value="compliant">Conforme</option>
-          <option value="alert">Alerte</option>
-          <option value="blocked">Bloqué</option>
+          <option value="">- Statut -</option>
+          <option v-for="s in availableStatuses" :key="s" :value="s">{{ statusLabel(s) }}</option>
         </select>
-        <button @click="doStatusUpdate" :disabled="!statusLotId">Valider</button>
+        <button @click="doStatusUpdate" :disabled="!statusLotId || !newStatus">Valider</button>
       </div>
 
       <!-- Export tracabilité -->
@@ -122,7 +145,7 @@ onMounted(fetchLots)
     <!-- Lots avec alertes / non-conformités -->
     <div class="section">
       <h3>Lots non conformes / en alerte</h3>
-      <LotTable :lots="lots.filter(l => ['alert', 'blocked'].includes(l.status))" :loading="loading" />
+      <LotTable :lots="lots.filter(l => ['alert', 'blocked'].includes(l.status?.toLowerCase()))" :loading="loading" />
     </div>
 
     <div class="section">
@@ -147,6 +170,15 @@ h2 {
   color: #15803d;
   font-size: 0.875rem;
   background: #f0fdf4;
+  padding: 8px 12px;
+  border-radius: 6px;
+  margin-bottom: 1rem;
+}
+
+.error {
+  color: #b91c1c;
+  font-size: 0.875rem;
+  background: #fee2e2;
   padding: 8px 12px;
   border-radius: 6px;
   margin-bottom: 1rem;

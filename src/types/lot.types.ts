@@ -1,4 +1,4 @@
-export type LotStatus = 'pending' | 'stored' | 'compliant' | 'alert' | 'blocked' | 'shipped'
+export type LotStatus = string
 
 export interface Lot {
   id: string
