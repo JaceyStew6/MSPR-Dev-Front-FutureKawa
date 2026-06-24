@@ -15,7 +15,7 @@ const STATUS_LABELS: Record<string, string> = {
 function statusLabel(s: string) { return STATUS_LABELS[s.toLowerCase()] ?? s }
 
 const authStore = useAuthStore()
-const { autoFilters } = storeToRefs(authStore)
+const { autoFilters, role } = storeToRefs(authStore)
 
 const lots = ref<Lot[]>([])
 const loading = ref(false)
@@ -110,12 +110,12 @@ onMounted(fetchLots)
 
 <template>
   <div class="page">
-    <h2>Équipe Qualité</h2>
+    <h2>Qualité</h2>
     <p v-if="msg" :class="msgError ? 'error' : 'success'">{{ msg }}</p>
 
     <div class="actions-grid">
-      <!-- Mise à jour statut -->
-      <div class="action-card">
+      <!-- Mise à jour statut (équipe qualité uniquement) -->
+      <div v-if="role === 'quality'" class="action-card">
         <h3>Mettre à jour le statut d'un lot</h3>
         <select v-model="statusLotId">
           <option :value="null">- Sélectionner un lot -</option>
