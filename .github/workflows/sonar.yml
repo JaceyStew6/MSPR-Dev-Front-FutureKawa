@@ -50,7 +50,7 @@ jobs:
       # ── 1. Checkout ───────────────────────────────────────────────────────
       # GitLab CI : le checkout est automatique
       # GitHub Actions : il faut l'action actions/checkout explicitement
-      - name: Checkout du code
+      - name: Code Checkout
         uses: actions/checkout@v4
         with:
           # fetch-depth: 0 → historique complet pour que Sonar calcule
@@ -68,14 +68,14 @@ jobs:
           cache: 'npm'
 
       # ── 3. Installation des dépendances ───────────────────────────────────
-      - name: Installation des dépendances npm
+      - name: npm packages installation
         run: npm ci
 
       # ── 4. Tests + génération du rapport de coverage ──────────────────────
       # "npm run test:unit -- --coverage" lance Vitest avec le flag coverage
       # Vitest écrit coverage/lcov.info (configuré dans vite.config.ts)
       # GitLab CI : même commande dans le script: du job test
-      - name: Tests unitaires avec coverage (Vitest)
+      - name: Unit Tests with coverage (Vitest)
         run: npm run test:unit -- --coverage --reporter=verbose
         continue-on-error: true   # Ne bloque pas le pipeline si des tests échouent
         env:
@@ -96,7 +96,7 @@ jobs:
       # GitLab CI équivalent :
       #   image: sonarsource/sonar-scanner-cli
       #   script: sonar-scanner
-      - name: Analyse SonarQube + Quality Gate
+      - name: SonarQube Analysis & Quality Gate
         shell: cmd
         run: |
           docker run --rm ^
