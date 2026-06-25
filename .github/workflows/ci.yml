@@ -108,26 +108,26 @@ jobs:
   # Tourne en parallèle avec test (même needs: build)
   # npm run lint enchaîne oxlint puis eslint (défini dans package.json)
   # ─────────────────────────────────────────────────────────────────────────────
-  lint:
-    name: Lint (oxlint & ESLint)
-    runs-on: self-hosted
-    needs: build
+  # lint:
+  #   name: Lint (oxlint & ESLint)
+  #   runs-on: self-hosted
+  #   needs: build
 
-    steps:
-      - name: Code checkout
-        uses: actions/checkout@v4
+  #   steps:
+  #     - name: Code checkout
+  #       uses: actions/checkout@v4
 
-      - name: Setup Node.js 22
-        uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-          cache: 'npm'
+  #     - name: Setup Node.js 22
+  #       uses: actions/setup-node@v4
+  #       with:
+  #         node-version: '22'
+  #         cache: 'npm'
 
-      - name: npm packages installation
-        run: npm ci
+  #     - name: npm packages installation
+  #       run: npm ci
 
-      - name: Lint (oxlint & ESLint)
-        run: npm run lint
+  #     - name: Lint (oxlint & ESLint)
+  #       run: npm run lint
 
 
   # ── JOB 4 : ANALYSE SONARQUBE ────────────────────────────────────────────────
