@@ -1,0 +1,112 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Workflow : Analyse SonarQube + Quality Gate
+#
+# Équivalent GitLab CI :
+#   GitLab → .gitlab-ci.yml avec stages, variables CI/CD, tags pour runner
+#   GitHub → .github/workflows/*.yml avec jobs, secrets, runs-on pour runner
+#
+# Différences clés :
+#   | GitLab CI              | GitHub Actions                         |
+#   |------------------------|----------------------------------------|
+#   | variables (CI/CD)      | secrets (Settings > Secrets > Actions) |
+#   | tags: [self-hosted]    | runs-on: self-hosted                   |
+#   | stages + jobs          | jobs avec steps                        |
+#   | $CI_COMMIT_REF_NAME    | ${{ github.ref_name }}                 |
+#   | only/except            | on: push/pull_request avec branches    |
+#   | artifacts: paths       | actions/upload-artifact                |
+# ─────────────────────────────────────────────────────────────────────────────
+
+name: SonarQube Analysis
+
+# ─── Déclencheurs ─────────────────────────────────────────────────────────────
+# GitLab CI : only: [main, develop] / on_merge_request
+# GitHub Actions : on.push.branches + on.pull_request.branches
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+      - develop
+
+# ─── Jobs ─────────────────────────────────────────────────────────────────────
+jobs:
+  sonarqube:
+    name: SonarQube Quality Gate
+
+    # ── Runner ──────────────────────────────────────────────────────────────
+    # GitLab CI : tags: [self-hosted]  (le runner doit avoir ce tag)
+    # GitHub Actions : runs-on: self-hosted
+    #
+    # On utilise un runner self-hosted car GitHub Actions (runners hébergés)
+    # ne peut PAS accéder à http://localhost:9000 sur votre machine Windows.
+    # Le self-hosted runner tourne sur votre machine et peut joindre localhost.
+    # ────────────────────────────────────────────────────────────────────────
+    runs-on: self-hosted
+
+    steps:
+      # ── 1. Checkout ───────────────────────────────────────────────────────
+      # GitLab CI : le checkout est automatique
+      # GitHub Actions : il faut l'action actions/checkout explicitement
+      - name: Checkout du code
+        uses: actions/checkout@v4
+        with:
+          # fetch-depth: 0 → historique complet pour que Sonar calcule
+          # correctement le blame et les nouvelles lignes de code
+          fetch-depth: 0
+
+      # ── 2. Setup Node.js ──────────────────────────────────────────────────
+      # GitLab CI : image: node:22-alpine dans le job ou global
+      # GitHub Actions : actions/setup-node (le runner self-hosted doit avoir
+      # Node installé OU cette action l'installe via nvm/fnm)
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      # ── 3. Installation des dépendances ───────────────────────────────────
+      - name: Installation des dépendances npm
+        run: npm ci
+
+      # ── 4. Tests + génération du rapport de coverage ──────────────────────
+      # "npm run test:unit -- --coverage" lance Vitest avec le flag coverage
+      # Vitest écrit coverage/lcov.info (configuré dans vite.config.ts)
+      # GitLab CI : même commande dans le script: du job test
+      - name: Tests unitaires avec coverage (Vitest)
+        run: npm run test:unit -- --coverage --reporter=verbose
+        env:
+          # Assure un environnement non-interactif pour Vitest
+          CI: true
+
+      # ── 5. Sonar Scanner ──────────────────────────────────────────────────
+      # GitLab CI : utilise sonarqube-scanner ou l'image sonarsource/sonar-scanner-cli
+      # GitHub Actions : action officielle SonarQube (sonarsource/sonarqube-scan-action)
+      #
+      # SONAR_TOKEN  → secret GitHub (Settings > Secrets and variables > Actions)
+      #                équivalent de la variable CI/CD SONAR_TOKEN dans GitLab
+      # SONAR_HOST_URL → idem, valeur : http://localhost:9000
+      #
+      # sonar.qualitygate.wait=true (dans sonar-project.properties) fait attendre
+      # le résultat de la Quality Gate et retourne exit code 1 si elle échoue.
+      # C'est ce qui bloque le pipeline.
+      - name: Analyse SonarQube
+        uses: sonarsource/sonarqube-scan-action@v5
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+
+      # ── 6. Vérification de la Quality Gate ───────────────────────────────
+      # sonarsource/sonarqube-quality-gate-action vérifie le statut après l'analyse.
+      # Si la Quality Gate est FAILED → le step échoue → le job échoue → PR bloquée.
+      # GitLab CI : équivalent d'un curl sur l'API /api/qualitygates/project_status
+      #             ou sonar.qualitygate.wait=true dans le scanner (on fait les deux
+      #             ici pour plus de lisibilité).
+      - name: Vérification de la Quality Gate
+        uses: sonarsource/sonarqube-quality-gate-action@v1
+        timeout-minutes: 5
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}

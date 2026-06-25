@@ -9,7 +9,7 @@ import {
 } from './data'
 
 // Token fictif stocké en mémoire pour simuler l'auth
-let currentUserId: number | null = null
+let currentUserId: string | null = null
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -31,7 +31,8 @@ function parseQs(url: string): Record<string, string> {
 }
 
 function num(v: string | undefined): number | undefined {
-  return v !== undefined ? Number(v) : undefined
+  if (v === undefined) return undefined
+  return Number(v)
 }
 
 // ── Router mock ───────────────────────────────────────────────────────────────
