@@ -145,7 +145,7 @@ jobs:
   sonar:
     name: SonarQube Analysis
     runs-on: self-hosted
-    needs: [test, lint]
+    needs: [test]
 
     steps:
       - name: Code checkout
