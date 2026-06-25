@@ -42,7 +42,8 @@ const quickLinks = computed(() => {
     <!-- KPI cards -->
     <div class="cards">
       <div class="card card--alert">
-        <p>KPI(test for sonar CI)</p>
+        <p>(test for sonar CI)</p>
+        <p>(test for sonar CI)</p>
         <div class="card-value">{{ unreadCount }}</div>
         <div class="card-label">Alertes non lues</div>
       </div>
