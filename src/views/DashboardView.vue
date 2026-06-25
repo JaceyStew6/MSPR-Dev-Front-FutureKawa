@@ -43,7 +43,6 @@ const quickLinks = computed(() => {
     <div class="cards">
       <div class="card card--alert">
         <p>(test for sonar CI)</p>
-        <p>(test for sonar CI)</p>
         <div class="card-value">{{ unreadCount }}</div>
         <div class="card-label">Alertes non lues</div>
       </div>
