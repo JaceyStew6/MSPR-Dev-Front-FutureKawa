@@ -82,42 +82,25 @@ jobs:
           # Assure un environnement non-interactif pour Vitest
           CI: true
 
-      # ── 5. Cache du binaire SonarScanner CLI ─────────────────────────────
-      # Les actions officielles SonarSource (sonarqube-scan-action, quality-gate-action)
-      # exécutent des scripts bash via WSL, qui n'est pas disponible sur ce runner Windows.
-      # On télécharge directement le ZIP Windows (JRE bundlé) et on le met en cache.
-      # GitLab CI : équivalent de l'image Docker sonarsource/sonar-scanner-cli
-      - name: Cache SonarScanner CLI
-        id: cache-sonar
-        uses: actions/cache@v4
-        with:
-          path: C:\sonar-scanner-cli
-          key: sonar-scanner-cli-7.2.0.5079
-
-      # ── 6. Téléchargement SonarScanner CLI (si absent du cache) ──────────
-      - name: Téléchargement SonarScanner CLI
-        if: steps.cache-sonar.outputs.cache-hit != 'true'
-        shell: powershell
-        run: |
-          $url = "https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-7.2.0.5079-windows-x64.zip"
-          Invoke-WebRequest -Uri $url -OutFile sonar-scanner.zip
-          Expand-Archive -Path sonar-scanner.zip -DestinationPath "C:\sonar-scanner-cli" -Force
-          Remove-Item sonar-scanner.zip
-
-      # ── 7. Analyse SonarQube + Quality Gate ──────────────────────────────
-      # On appelle sonar-scanner.bat directement (pas de bash requis).
-      # sonar.qualitygate.wait=true dans sonar-project.properties fait attendre
-      # le résultat de la Quality Gate et retourne exit code 1 si elle échoue.
-      # L'action sonarqube-quality-gate-action n'est plus nécessaire.
+      # ── 5. Analyse SonarQube + Quality Gate (via Docker) ─────────────────
+      # On utilise l'image officielle sonarsource/sonar-scanner-cli.
+      # Aucun binaire à installer : Docker est déjà disponible sur la machine.
       #
-      # GitLab CI :
-      #   script:
-      #     - sonar-scanner -Dsonar.token=$SONAR_TOKEN -Dsonar.host.url=$SONAR_HOST_URL
+      # host.docker.internal : depuis un conteneur Docker sur Windows/macOS,
+      # résout vers le localhost de la machine hôte → atteint SonarQube sur :9000.
+      # (Ne pas utiliser localhost ici : il pointerait vers le conteneur lui-même.)
+      #
+      # sonar.qualitygate.wait=true dans sonar-project.properties fait attendre
+      # le résultat et retourne exit code 1 si la Quality Gate échoue.
+      #
+      # GitLab CI équivalent :
+      #   image: sonarsource/sonar-scanner-cli
+      #   script: sonar-scanner
       - name: Analyse SonarQube + Quality Gate
-        shell: powershell
+        shell: cmd
         run: |
-          $scanner = Get-ChildItem -Path "C:\sonar-scanner-cli" -Filter "sonar-scanner.bat" -Recurse | Select-Object -First 1
-          & $scanner.FullName "-Dsonar.token=${{ secrets.SONAR_TOKEN }}" "-Dsonar.host.url=${{ secrets.SONAR_HOST_URL }}"
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+          docker run --rm ^
+            -e SONAR_TOKEN=${{ secrets.SONAR_TOKEN }} ^
+            -e SONAR_HOST_URL=http://host.docker.internal:9000 ^
+            -v "%GITHUB_WORKSPACE%:/usr/src" ^
+            sonarsource/sonar-scanner-cli:latest
