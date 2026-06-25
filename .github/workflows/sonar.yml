@@ -97,7 +97,7 @@ jobs:
       # ── 6. Téléchargement SonarScanner CLI (si absent du cache) ──────────
       - name: Téléchargement SonarScanner CLI
         if: steps.cache-sonar.outputs.cache-hit != 'true'
-        shell: pwsh
+        shell: powershell
         run: |
           $url = "https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-7.2.0.5079-windows-x64.zip"
           Invoke-WebRequest -Uri $url -OutFile sonar-scanner.zip
@@ -114,7 +114,7 @@ jobs:
       #   script:
       #     - sonar-scanner -Dsonar.token=$SONAR_TOKEN -Dsonar.host.url=$SONAR_HOST_URL
       - name: Analyse SonarQube + Quality Gate
-        shell: pwsh
+        shell: powershell
         run: |
           $scanner = Get-ChildItem -Path "C:\sonar-scanner-cli" -Filter "sonar-scanner.bat" -Recurse | Select-Object -First 1
           & $scanner.FullName "-Dsonar.token=${{ secrets.SONAR_TOKEN }}" "-Dsonar.host.url=${{ secrets.SONAR_HOST_URL }}"
