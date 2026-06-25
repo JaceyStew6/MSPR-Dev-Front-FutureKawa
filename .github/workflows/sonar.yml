@@ -82,32 +82,42 @@ jobs:
           # Assure un environnement non-interactif pour Vitest
           CI: true
 
-      # ── 5. Sonar Scanner ──────────────────────────────────────────────────
-      # GitLab CI : utilise sonarqube-scanner ou l'image sonarsource/sonar-scanner-cli
-      # GitHub Actions : action officielle SonarQube (sonarsource/sonarqube-scan-action)
-      #
-      # SONAR_TOKEN  → secret GitHub (Settings > Secrets and variables > Actions)
-      #                équivalent de la variable CI/CD SONAR_TOKEN dans GitLab
-      # SONAR_HOST_URL → idem, valeur : http://localhost:9000
-      #
-      # sonar.qualitygate.wait=true (dans sonar-project.properties) fait attendre
-      # le résultat de la Quality Gate et retourne exit code 1 si elle échoue.
-      # C'est ce qui bloque le pipeline.
-      - name: Analyse SonarQube
-        uses: sonarsource/sonarqube-scan-action@v5
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+      # ── 5. Cache du binaire SonarScanner CLI ─────────────────────────────
+      # Les actions officielles SonarSource (sonarqube-scan-action, quality-gate-action)
+      # exécutent des scripts bash via WSL, qui n'est pas disponible sur ce runner Windows.
+      # On télécharge directement le ZIP Windows (JRE bundlé) et on le met en cache.
+      # GitLab CI : équivalent de l'image Docker sonarsource/sonar-scanner-cli
+      - name: Cache SonarScanner CLI
+        id: cache-sonar
+        uses: actions/cache@v4
+        with:
+          path: C:\sonar-scanner-cli
+          key: sonar-scanner-cli-7.2.0.5079
 
-      # ── 6. Vérification de la Quality Gate ───────────────────────────────
-      # sonarsource/sonarqube-quality-gate-action vérifie le statut après l'analyse.
-      # Si la Quality Gate est FAILED → le step échoue → le job échoue → PR bloquée.
-      # GitLab CI : équivalent d'un curl sur l'API /api/qualitygates/project_status
-      #             ou sonar.qualitygate.wait=true dans le scanner (on fait les deux
-      #             ici pour plus de lisibilité).
-      - name: Vérification de la Quality Gate
-        uses: sonarsource/sonarqube-quality-gate-action@v1
-        timeout-minutes: 5
+      # ── 6. Téléchargement SonarScanner CLI (si absent du cache) ──────────
+      - name: Téléchargement SonarScanner CLI
+        if: steps.cache-sonar.outputs.cache-hit != 'true'
+        shell: pwsh
+        run: |
+          $url = "https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-7.2.0.5079-windows-x64.zip"
+          Invoke-WebRequest -Uri $url -OutFile sonar-scanner.zip
+          Expand-Archive -Path sonar-scanner.zip -DestinationPath "C:\sonar-scanner-cli" -Force
+          Remove-Item sonar-scanner.zip
+
+      # ── 7. Analyse SonarQube + Quality Gate ──────────────────────────────
+      # On appelle sonar-scanner.bat directement (pas de bash requis).
+      # sonar.qualitygate.wait=true dans sonar-project.properties fait attendre
+      # le résultat de la Quality Gate et retourne exit code 1 si elle échoue.
+      # L'action sonarqube-quality-gate-action n'est plus nécessaire.
+      #
+      # GitLab CI :
+      #   script:
+      #     - sonar-scanner -Dsonar.token=$SONAR_TOKEN -Dsonar.host.url=$SONAR_HOST_URL
+      - name: Analyse SonarQube + Quality Gate
+        shell: pwsh
+        run: |
+          $scanner = Get-ChildItem -Path "C:\sonar-scanner-cli" -Filter "sonar-scanner.bat" -Recurse | Select-Object -First 1
+          & $scanner.FullName "-Dsonar.token=${{ secrets.SONAR_TOKEN }}" "-Dsonar.host.url=${{ secrets.SONAR_HOST_URL }}"
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
