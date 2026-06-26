@@ -61,6 +61,9 @@ async function handleLogout() {
 
     <div class="nav-right">
       <AlertBadge v-if="role === 'warehouse_manager'" />
+      <a href="/user-guide.pdf" target="_blank" rel="noopener" class="btn-help" title="User guide">
+        ? Help
+      </a>
       <span class="user-info">{{ user?.name }} · <em>{{ user?.role }}</em></span>
       <button class="btn-logout" @click="handleLogout">Log out</button>
     </div>
@@ -137,5 +140,21 @@ async function handleLogout() {
 
 .btn-logout:hover {
   background: #2d4a2d;
+}
+
+.btn-help {
+  background: transparent;
+  border: 1px solid #4a7a4a;
+  color: #c1d1c1;
+  padding: 4px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.82rem;
+  text-decoration: none;
+}
+
+.btn-help:hover {
+  background: #2d4a2d;
+  color: white;
 }
 </style>
