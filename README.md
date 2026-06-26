@@ -1,4 +1,4 @@
-# Installation Guide — FutureKawa Frontend
+# Installation Guide - FutureKawa Frontend
 
 > **Audience:** Developers, DevOps engineers, and technical contributors.  
 > **Repository:** [github.com/JaceyStew6/MSPR-Dev-Front-FutureKawa](https://github.com/JaceyStew6/MSPR-Dev-Front-FutureKawa)
@@ -34,7 +34,6 @@
 | Routing | [Vue Router](https://router.vuejs.org/) | `^5.0` |
 | Charting | [Chart.js](https://www.chartjs.org/) | `^4.4` |
 | Testing | [Vitest](https://vitest.dev/) + [@vue/test-utils](https://test-utils.vuejs.org/) | `^4.1` |
-| Linting | [ESLint](https://eslint.org/) + [oxlint](https://oxc.rs/docs/guide/usage/linter) | `^10` / `~1.60` |
 | Formatting | [Prettier](https://prettier.io/) | `3.8` |
 | Type checking | vue-tsc | `^3.2` |
 | Container | Docker (multi-stage) + nginx | alpine |
@@ -44,40 +43,42 @@
 
 ## 2. Architecture Overview
 
+![Frontend-architecture](/docs/architecture.png "Frontend Architecture")
+
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                        Browser / Client                     │
 │                                                             │
-│   Vue 3 SPA (Vite build → nginx static serve)              │
-│   ┌───────────┐  ┌────────────┐  ┌──────────────────────┐  │
-│   │ Vue Router│  │   Pinia    │  │  Chart.js components │  │
-│   │  (RBAC)   │  │  stores    │  │  (readings, KPIs)    │  │
-│   └───────────┘  └────────────┘  └──────────────────────┘  │
+│   Vue 3 SPA (Vite build → nginx static serve)               │
+│   ┌───────────┐  ┌────────────┐  ┌──────────────────────┐   │
+│   │ Vue Router│  │   Pinia    │  │  Chart.js components │   │
+│   │  (RBAC)   │  │  stores    │  │  (readings, KPIs)    │   │
+│   └───────────┘  └────────────┘  └──────────────────────┘   │
 │          │               │                                  │
-│   ┌──────▼───────────────▼──────────────────────────────┐  │
-│   │                  services/api.ts                     │  │
-│   │   Bearer JWT · fetch wrapper · 401 auto-logout       │  │
-│   └──────────────────────────────┬──────────────────────┘  │
+│   ┌──────▼───────────────▼──────────────────────────────┐   │
+│   │                  services/api.ts                    │   │
+│   │   Bearer JWT · fetch wrapper · 401 auto-logout      │   │
+│   └──────────────────────────────┬──────────────────────┘   │
 └─────────────────────────────────-│──────────────────────────┘
                                    │  HTTP / REST
                     ┌──────────────▼──────────────────┐
-                    │   nginx reverse proxy (Docker)   │
-                    │   /api-siege/ → backend:8082     │
-                    └──────────────────────────────────┘
+                    │   nginx reverse proxy (Docker)  │
+                    │   /api-siege/ → backend:8082    │
+                    └─────────────────────────────────┘
                                    │
-              ┌────────────────────┼────────────────────┐
-              │                    │                    │
-     ┌────────▼──────┐   ┌────────▼──────┐   ┌────────▼──────┐
-     │  Siège API    │   │  Brazil API   │   │  Colombia API │
-     │  :8082        │   │  :8080        │   │  :8083        │
-     └───────────────┘   └───────────────┘   └───────────────┘
+                                   │
+                                   │                    
+                          ┌────────▼──────┐   
+                          │  Siège API    │   
+                          │  :8082        │   
+                          └───────────────┘   
 ```
 
 ### Key Design Decisions
 
 - **Role-Based Access Control (RBAC):** enforced at the router level via `router.beforeEach`. Each route has an allowlist of roles defined in `ROLE_ACCESS` (`src/router/index.ts`). Unauthorized navigation silently redirects to `/dashboard`.
 - **Auto-scoped data:** on login, `auth.store.ts` enriches the user object with their `farm_id` and `warehouse_ids` by calling the geo API. All service calls use `autoFilters` (from the store) to automatically constrain queries to the user's country/farm/warehouse.
-- **Multi-backend architecture:** the application targets a distributed backend with one API per country. The Vite dev server and nginx proxy both expose a single `/api-siege` entry point that routes to the appropriate backend.
+- **Multi-backend architecture:** the application targets a distributed backend with one API per country, called by the 'siege API'. The Vite dev server and nginx proxy both expose a single `/api-siege` entry point that routes to the 'siege API'.
 - **Mock mode:** a full in-memory mock layer (`src/mocks/`) intercepts all `fetch` calls when `VITE_MOCK=true`, enabling full frontend development without any backend running.
 
 ---
@@ -88,14 +89,14 @@
 src/
 ├── assets/           # Static CSS (base.css, main.css) and SVG logo
 ├── components/
-│   ├── charts/       # ReadingChart.vue — Chart.js temperature/humidity graph
+│   ├── charts/       # ReadingChart.vue - Chart.js temperature/humidity graph
 │   └── common/       # Shared UI: AppNav, AlertBadge, LotTable, CascadeFilter,
 │                     #            Pagination, StatusBadge, ThresholdDot
 ├── config/
 │   └── routes.ts     # Role → default redirect map (ROLE_DEFAULT_ROUTES)
 ├── mocks/
 │   ├── data.ts       # Static fixture data (lots, alerts, users, warehouses…)
-│   └── handlers.ts   # Mock fetch router — maps URL patterns to fixture data
+│   └── handlers.ts   # Mock fetch router - maps URL patterns to fixture data
 ├── router/
 │   └── index.ts      # Vue Router setup + RBAC navigation guard
 ├── services/
@@ -126,7 +127,7 @@ src/
 │       ├── quality/QualityView.vue
 │       ├── supply-chain/SupplyChainView.vue
 │       └── hq/HQView.vue
-├── App.vue           # Root component — mounts AppNav + RouterView
+├── App.vue           # Root component - mounts AppNav + RouterView
 └── main.ts           # App bootstrap: Vue, Pinia, Router, MSW (mock)
 ```
 
@@ -138,7 +139,7 @@ src/
 |---|---|---|
 | Node.js | **22.12.0** (or 20.19.0 LTS) | Enforced via `engines` field in `package.json` |
 | npm | 10+ | Bundled with Node 22 |
-| Git | Any recent | — |
+| Git | Any recent | - |
 | Docker + Docker Compose | 24+ | Required only for production / SonarQube |
 
 > **Tip:** use [nvm](https://github.com/nvm-sh/nvm) or [fnm](https://github.com/Schniz/fnm) to switch Node versions easily.
@@ -157,7 +158,7 @@ npm install
 
 # 3. Configure environment
 cp .env.example .env
-# Edit .env — see Section 6
+# Edit .env - see Section 6
 
 # 4. Start the dev server
 npm run dev
@@ -165,7 +166,7 @@ npm run dev
 
 The app is available at **http://localhost:5173** by default.
 
-Hot Module Replacement (HMR) is enabled — changes to `.vue` and `.ts` files are reflected instantly without a full reload.
+Hot Module Replacement (HMR) is enabled - changes to `.vue` and `.ts` files are reflected instantly without a full reload.
 
 ---
 
@@ -177,10 +178,6 @@ All variables are prefixed with `VITE_` and exposed to the browser at build time
 |---|---|---|
 | `VITE_MOCK` | `false` | Set to `true` to enable the in-memory mock layer (no backend required) |
 | `VITE_API_BASE_URL` | `/api-siege` | Base URL for all API requests. In dev, proxied by Vite to the backend |
-| `VITE_SIEGE_URL` | `http://localhost:8082` | Centralised read API (used in `.env.example`) |
-| `VITE_BRESIL_URL` | `http://localhost:8080` | Brazil backend |
-| `VITE_EQUATEUR_URL` | `http://localhost:8081` | Ecuador backend |
-| `VITE_COLOMBIE_URL` | `http://localhost:8083` | Colombia backend |
 
 **Typical `.env` for development with a local backend:**
 
@@ -203,7 +200,7 @@ server: {
 },
 ```
 
-> **Never commit `.env`** — it is listed in `.gitignore`. Only `.env.example` should be versioned.
+> **Never commit `.env`** - it is listed in `.gitignore`. Only `.env.example` should be versioned.
 
 ---
 
@@ -268,7 +265,7 @@ Two-stage linting pipeline (`lint:oxlint` → `lint:eslint`):
 - **oxlint** handles fast, low-level correctness rules (configured in `.oxlintrc.json`)
 - **ESLint** applies Vue-specific and TypeScript rules on top
 
-Both are run with `--fix` — the majority of issues are auto-corrected.
+Both are run with `--fix` - the majority of issues are auto-corrected.
 
 ### EditorConfig
 
@@ -312,8 +309,8 @@ docker build -t futurekawa-frontend .
 
 The `Dockerfile` is a two-stage build:
 
-1. **Stage 1 (builder):** Node 22 Alpine — installs dependencies and runs `npm run build-only`, producing the `dist/` folder.
-2. **Stage 2 (serve):** nginx Alpine — copies `dist/` and the custom `nginx.conf`, listens on port 80.
+1. **Stage 1 (builder):** Node 22 Alpine - installs dependencies and runs `npm run build-only`, producing the `dist/` folder.
+2. **Stage 2 (serve):** nginx Alpine - copies `dist/` and the custom `nginx.conf`, listens on port 80.
 
 ### nginx proxy
 
@@ -333,7 +330,7 @@ docker compose ps
 |---|---|---|
 | `app` | http://localhost:3000 | Vue.js SPA served by nginx |
 | `sonarqube` | http://localhost:9000 | SonarQube (default login: `admin` / `admin`) |
-| `sonar-db` | — | PostgreSQL for SonarQube (internal only) |
+| `sonar-db` | - | PostgreSQL for SonarQube (internal only) |
 
 > **Linux users:** you may need to increase `vm.max_map_count` for SonarQube:  
 > `sudo sysctl -w vm.max_map_count=524288`
@@ -351,7 +348,7 @@ Static analysis is configured in `sonar-project.properties`.
 | `sonar.projectKey` | `futurekawa-frontend` |
 | `sonar.sources` | `src/` |
 | `sonar.javascript.lcov.reportPaths` | `coverage/lcov.info` |
-| `sonar.qualitygate.wait` | `true` — scanner fails if the Quality Gate is not passed |
+| `sonar.qualitygate.wait` | `true` - scanner fails if the Quality Gate is not passed |
 
 **Running the scanner locally:**
 
@@ -373,7 +370,7 @@ docker run --rm \
 
 The frontend expects a REST API that follows these conventions:
 
-- **Auth:** `POST /auth/login` → `{ token, user }` — always mocked client-side
+- **Auth:** `POST /auth/login` → `{ token, user }` - still mocked client-side
 - **Bearer token:** all authenticated requests send `Authorization: Bearer <token>`
 - **Pagination:** responses for list endpoints follow `{ data: T[], total: number, page: number, limit: number }`
 - **Error format:** `{ message: string }` with appropriate HTTP status code
