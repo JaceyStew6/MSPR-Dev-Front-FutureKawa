@@ -1,18 +1,18 @@
 # ─────────────────────────────────────────────────────────────────────────────
 # CI/CD - FutureKawa Frontend
 #
-# Pipeline :  build ──► test ┐
-#                            ├──► sonar ──► deploy (main uniquement)
-#                       lint ┘
+# Pipeline: build ──► test ┐
+#                          ├──► sonar ──► deploy (main only)
+#                     lint ┘
 #
-# Équivalences GitLab CI → GitHub Actions :
-#   stages                    → jobs avec needs: pour forcer l'ordre
-#   jobs en parallèle         → jobs avec le même needs: (tournent en //)
-#   image: sonarsource/...    → docker run dans le step (runner Windows)
+# GitLab CI equivalences → GitHub Actions:
+#   stages                    → jobs with needs: to enforce order
+#   parallel jobs             → jobs with the same needs: (run in parallel)
+#   image: sonarsource/...    → docker run in the step (Windows runner)
 #   tags: [local]             → runs-on: self-hosted
 #   artifacts: paths:         → actions/upload-artifact + download-artifact
-#   artifacts: when: always   → if: always() sur les steps upload
-#   allow_failure: false      → comportement par défaut (pas de continue-on-error)
+#   artifacts: when: always   → if: always() on upload steps
+#   allow_failure: false      → default behavior (no continue-on-error)
 #   $CI_COMMIT_REF_SLUG       → ${{ github.ref_name }}
 #   $CI_PIPELINE_SOURCE       → ${{ github.event_name }}
 #   environment: production   → environment: production
@@ -20,9 +20,9 @@
 
 name: CI/CD - FutureKawa Frontend
 
-# ─── Déclencheurs ─────────────────────────────────────────────────────────────
-# GitLab : rules: if $CI_COMMIT_BRANCH == 'main'/'develop'
-#               + if $CI_PIPELINE_SOURCE == 'merge_request_event'
+# ─── Triggers ─────────────────────────────────────────────────────────────────
+# GitLab: rules: if $CI_COMMIT_BRANCH == 'main'/'develop'
+#              + if $CI_PIPELINE_SOURCE == 'merge_request_event'
 on:
   push:
     branches: [main, develop]
@@ -31,10 +31,10 @@ on:
 
 jobs:
 
-  # ── JOB 1 : BUILD ────────────────────────────────────────────────────────────
-  # GitLab : stage: build → build-job
-  # build-only = vite build sans vue-tsc (évite les erreurs TS bloquantes)
-  # Le dist/ est transmis aux jobs suivants via artifact
+  # ── JOB 1 : BUILD ─────────────────────────────────────────────────────────────
+  # GitLab: stage: build → build-job
+  # build-only = vite build without vue-tsc (avoids blocking TS errors)
+  # The dist/ folder is passed to later jobs via artifact
   # ─────────────────────────────────────────────────────────────────────────────
   build:
     name: Build
@@ -64,11 +64,11 @@ jobs:
           retention-days: 1
 
 
-  # ── JOB 2 : TESTS UNITAIRES ──────────────────────────────────────────────────
-  # GitLab : stage: test → unit-test-job
-  # Tourne en parallèle avec lint (même needs: build)
-  # continue-on-error sur le step vitest : génère coverage/lcov.info même si
-  # des tests échouent. Le vrai bloquage est délégué à la Quality Gate SonarQube.
+  # ── JOB 2 : UNIT TESTS ───────────────────────────────────────────────────────
+  # GitLab: stage: test → unit-test-job
+  # Runs in parallel with lint (same needs: build)
+  # continue-on-error on the vitest step: generates coverage/lcov.info even if
+  # tests fail. The actual blocking decision is delegated to the SonarQube Quality Gate.
   # ─────────────────────────────────────────────────────────────────────────────
   test:
     name: Unit tests (Vitest)
@@ -103,44 +103,15 @@ jobs:
           retention-days: 1
 
 
-  # ── JOB 3 : LINT ─────────────────────────────────────────────────────────────
-  # GitLab : stage: test → lint-test-job
-  # Tourne en parallèle avec test (même needs: build)
-  # npm run lint enchaîne oxlint puis eslint (défini dans package.json)
-  # ─────────────────────────────────────────────────────────────────────────────
-  # lint:
-  #   name: Lint (oxlint & ESLint)
-  #   runs-on: self-hosted
-  #   needs: build
-
-  #   steps:
-  #     - name: Code checkout
-  #       uses: actions/checkout@v4
-
-  #     - name: Setup Node.js 22
-  #       uses: actions/setup-node@v4
-  #       with:
-  #         node-version: '22'
-  #         cache: 'npm'
-
-  #     - name: npm packages installation
-  #       run: npm ci
-
-  #     - name: Lint (oxlint & ESLint)
-  #       run: npm run lint
-
-
-  # ── JOB 4 : ANALYSE SONARQUBE ────────────────────────────────────────────────
-  # GitLab : stage: sonar → build-sonar (tags: [local])
-  # Attend que test ET lint soient terminés.
-  # Runner self-hosted requis : SonarQube tourne sur localhost:9000.
-  # Scanner via image Docker officielle (pas de CLI à installer sur le runner).
-  # host.docker.internal : depuis un conteneur Docker sur Windows, pointe
-  #   vers le localhost de la machine hôte → atteint SonarQube sur :9000.
-  # sonar.qualitygate.wait=true (sonar-project.properties) : le scanner attend
-  #   le résultat et retourne exit code 1 si la Quality Gate échoue.
-  # Les rapports JSON sont uploadés même en cas d'échec (if: always()).
-  # GitLab : artifacts: when: always
+  # ── JOB 3 : SONARQUBE ANALYSIS ────────────────────────────────────────────────
+  # GitLab: stage: sonar → build-sonar (tags: [local])
+  # Waits for test to finish.
+  # Self-hosted runner required: SonarQube runs on localhost:9000.
+  # Scanner via official Docker image (no CLI installation needed on the runner).
+  # host.docker.internal: from a Docker container on Windows, points to the host machine localhost → reaches SonarQube on :9000.
+  # sonar.qualitygate.wait=true (sonar-project.properties): scanner waits for the result and returns exit code 1 if the Quality Gate fails.
+  # JSON reports are uploaded even on failure (if: always()).
+  # GitLab: artifacts: when: always
   # ─────────────────────────────────────────────────────────────────────────────
   sonar:
     name: SonarQube Analysis
@@ -207,10 +178,10 @@ jobs:
           retention-days: 7
 
 
-  # ── JOB 5 : DEPLOY ───────────────────────────────────────────────────────────
-  # GitLab : stage: deploy → deploy-job (environment: production)
-  # Déclenché uniquement sur push vers main (pas develop, pas PRs).
-  # GitLab équivalent :
+  # ── JOB 4 : DEPLOY ───────────────────────────────────────────────────────────
+  # GitLab: stage: deploy → deploy-job (environment: production)
+  # Triggered only on push to main (not develop, not PRs).
+  # GitLab equivalent:
   #   rules:
   #     - if: $CI_COMMIT_BRANCH == 'main'
   # ─────────────────────────────────────────────────────────────────────────────

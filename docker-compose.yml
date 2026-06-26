@@ -1,7 +1,7 @@
 services:
 
   # ─────────────────────────────────────────────
-  # Base de données de SonarQube
+  # SonarQube Database
   # ─────────────────────────────────────────────
   sonar-db:
     image: postgres:15-alpine
@@ -41,8 +41,6 @@ services:
       - sonar_logs:/opt/sonarqube/logs
     networks:
       - sonar_net
-    # SonarQube requiert vm.max_map_count >= 524288 sur Linux.
-    # Sur Docker Desktop (Windows/macOS), c'est déjà géré automatiquement.
     ulimits:
       nofile:
         soft: 65536
@@ -55,7 +53,7 @@ services:
       start_period: 60s
 
   # ─────────────────────────────────────────────
-  # Application Vue.js (build nginx)
+  # Vue.js app (build nginx)
   # ─────────────────────────────────────────────
   app:
     build:
