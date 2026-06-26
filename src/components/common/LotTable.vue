@@ -20,25 +20,25 @@ const colCount = computed(() => {
 
 function formatDate(d: string | undefined) {
   if (!d) return '-'
-  return new Date(d).toLocaleDateString('fr-FR')
+  return new Date(d).toLocaleDateString('en-US')
 }
 </script>
 
 <template>
   <div class="table-wrapper">
-    <div v-if="loading" class="loading">Chargement…</div>
+    <div v-if="loading" class="loading">Loading…</div>
     <table v-else class="lot-table">
       <thead>
         <tr>
-          <th>N° Lot</th>
-          <th>Pays</th>
-          <th>Exploitation</th>
-          <th>Entrepôt</th>
+          <th>Lot No.</th>
+          <th>Country</th>
+          <th>Farm</th>
+          <th>Warehouse</th>
           <th v-if="showZone !== false">Zone</th>
-          <th>Date production</th>
-          <th>Date stockage ↑ (FIFO)</th>
-          <th>Statut</th>
-          <th v-if="showReadings !== false">Dernière mesure</th>
+          <th>Production date</th>
+          <th>Storage date ↑ (FIFO)</th>
+          <th>Status</th>
+          <th v-if="showReadings !== false">Latest reading</th>
           <th></th>
         </tr>
       </thead>
@@ -63,11 +63,11 @@ function formatDate(d: string | undefined) {
             <span v-else class="no-data">-</span>
           </td>
           <td>
-            <RouterLink :to="`/lots/${lot.id}`" class="btn-detail">Détail</RouterLink>
+            <RouterLink :to="`/lots/${lot.id}`" class="btn-detail">Details</RouterLink>
           </td>
         </tr>
         <tr v-if="lots.length === 0">
-          <td :colspan="colCount" class="empty">Aucun lot trouvé</td>
+          <td :colspan="colCount" class="empty">No lots found</td>
         </tr>
       </tbody>
     </table>

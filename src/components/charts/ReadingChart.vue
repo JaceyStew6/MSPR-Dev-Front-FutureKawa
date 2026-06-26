@@ -53,7 +53,7 @@ async function loadAndRender() {
       to: to.value,
     })
 
-    const labels = readings.map((r) => new Date(r.recorded_at).toLocaleString('fr-FR'))
+    const labels = readings.map((r) => new Date(r.recorded_at).toLocaleString('en-US'))
     const temps = readings.map((r) => r.temperature)
     const humids = readings.map((r) => r.humidity)
 
@@ -65,7 +65,7 @@ async function loadAndRender() {
         labels,
         datasets: [
           {
-            label: 'Température (°C)',
+            label: 'Temperature (°C)',
             data: temps,
             borderColor: '#ef4444',
             backgroundColor: 'rgba(239,68,68,0.1)',
@@ -74,7 +74,7 @@ async function loadAndRender() {
             fill: true,
           },
           {
-            label: 'Humidité (%)',
+            label: 'Humidity (%)',
             data: humids,
             borderColor: '#3b82f6',
             backgroundColor: 'rgba(59,130,246,0.08)',
@@ -96,12 +96,12 @@ async function loadAndRender() {
           y: {
             type: 'linear',
             position: 'left',
-            title: { display: true, text: 'Température (°C)' },
+            title: { display: true, text: 'Temperature (°C)' },
           },
           y2: {
             type: 'linear',
             position: 'right',
-            title: { display: true, text: 'Humidité (%)' },
+            title: { display: true, text: 'Humidity (%)' },
             grid: { drawOnChartArea: false },
           },
         },
@@ -122,16 +122,16 @@ onUnmounted(() => chart?.destroy())
   <div class="chart-wrapper">
     <div class="chart-controls">
       <select v-model="granularity">
-        <option value="raw">Brut</option>
-        <option value="1h">Par heure</option>
-        <option value="1d">Par jour</option>
+        <option value="raw">Raw</option>
+        <option value="1h">Hourly</option>
+        <option value="1d">Daily</option>
       </select>
-      <label>Du <input type="date" v-model="from" /></label>
-      <label>Au <input type="date" v-model="to" /></label>
-      <button @click="loadAndRender" class="btn-refresh">↻ Actualiser</button>
+      <label>From <input type="date" v-model="from" /></label>
+      <label>To <input type="date" v-model="to" /></label>
+      <button @click="loadAndRender" class="btn-refresh">↻ Refresh</button>
     </div>
     <div class="chart-container">
-      <div v-if="loading" class="chart-loading">Chargement des données…</div>
+      <div v-if="loading" class="chart-loading">Loading data…</div>
       <canvas ref="canvasRef" />
     </div>
   </div>

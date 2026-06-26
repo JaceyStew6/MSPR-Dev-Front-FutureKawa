@@ -66,64 +66,69 @@ function selectZone(id: string) {
 
 <template>
   <div class="page">
-    <h2>Monitoring temps réel</h2>
-    <p class="subtitle">Actualisation automatique toutes les 30 secondes</p>
+    <h2>Real-time monitoring</h2>
+    <p class="subtitle">Auto-refresh every 30 seconds</p>
 
-    <!-- Sélecteur entrepôt -->
     <div class="warehouse-tabs">
-      <button
-        v-for="w in warehouses"
-        :key="w.id"
-        class="tab"
-        :class="{ 'tab--active': selectedWarehouseId === w.id }"
-        @click="selectWarehouse(w.id)"
-      >
+      <button v-for="w in warehouses" :key="w.id" class="tab" :class="{ 'tab--active': selectedWarehouseId === w.id }"
+        @click="selectWarehouse(w.id)">
         {{ w.name }}
       </button>
     </div>
 
-    <div v-if="loading && !summary" class="loading">Chargement…</div>
+    <div v-if="loading && !summary" class="loading">Loading…</div>
 
     <template v-else-if="summary">
-      <!-- Tableau des zones -->
       <div class="zones-grid">
-        <div
-          v-for="zone in summary.zones"
-          :key="zone.zone_id"
-          class="zone-card"
-          :class="{
-            'zone-card--ok': zone.threshold_status === 'ok',
-            'zone-card--warn': zone.threshold_status === 'warn',
-            'zone-card--alert': zone.threshold_status === 'alert',
-            'zone-card--selected': selectedZoneId === zone.zone_id,
-          }"
-          @click="selectZone(zone.zone_id)"
-        >
+        <div v-for="zone in summary.zones" :key="zone.zone_id" class="zone-card" :class="{
+          'zone-card--ok': zone.threshold_status === 'ok',
+          'zone-card--warn': zone.threshold_status === 'warn',
+          'zone-card--alert': zone.threshold_status === 'alert',
+          'zone-card--selected': selectedZoneId === zone.zone_id,
+        }" @click="selectZone(zone.zone_id)">
           <div class="zone-name">{{ zone.zone_name }}</div>
           <ThresholdDot :status="zone.threshold_status" />
           <div class="zone-values">
             <span>🌡 {{ zone.temperature.toFixed(1) }}°C</span>
             <span>💧 {{ zone.humidity.toFixed(0) }}%</span>
           </div>
-          <div class="zone-date">{{ new Date(zone.recorded_at).toLocaleTimeString('fr-FR') }}</div>
+          <div class="zone-date">{{ new Date(zone.recorded_at).toLocaleTimeString('en-US') }}</div>
         </div>
       </div>
 
-      <!-- Courbe de la zone sélectionnée -->
       <div v-if="selectedZoneId" class="chart-section">
-        <h3>Historique - Zone sélectionnée</h3>
+        <h3>History – Selected zone</h3>
         <ReadingChart :zone-id="selectedZoneId" :country-id="selectedCountryId" />
       </div>
-      <p v-else class="chart-hint">Cliquez sur une zone pour afficher son historique</p>
+      <p v-else class="chart-hint">Click on a zone to display its history</p>
     </template>
   </div>
 </template>
 
 <style scoped>
-.page { padding: 2rem; max-width: 1200px; margin: 0 auto; }
-h2 { margin: 0 0 0.25rem; }
-.subtitle { color: #6b7280; font-size: 0.85rem; margin: 0 0 1.5rem; }
-.warehouse-tabs { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
+.page {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+h2 {
+  margin: 0 0 0.25rem;
+}
+
+.subtitle {
+  color: #6b7280;
+  font-size: 0.85rem;
+  margin: 0 0 1.5rem;
+}
+
+.warehouse-tabs {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.5rem;
+}
+
 .tab {
   padding: 8px 18px;
   border: 1px solid #d1d5db;
@@ -132,9 +137,26 @@ h2 { margin: 0 0 0.25rem; }
   cursor: pointer;
   font-size: 0.875rem;
 }
-.tab--active { background: #1a2e1a; color: white; border-color: #1a2e1a; }
-.loading { text-align: center; padding: 2rem; color: #6b7280; }
-.zones-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+
+.tab--active {
+  background: #1a2e1a;
+  color: white;
+  border-color: #1a2e1a;
+}
+
+.loading {
+  text-align: center;
+  padding: 2rem;
+  color: #6b7280;
+}
+
+.zones-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
 .zone-card {
   border: 2px solid transparent;
   border-radius: 12px;
@@ -146,15 +168,62 @@ h2 { margin: 0 0 0.25rem; }
   transition: border-color 0.15s, transform 0.1s;
   background: white;
 }
-.zone-card:hover { transform: translateY(-2px); }
-.zone-card--ok   { border-color: #86efac; background: #f0fdf4; }
-.zone-card--warn { border-color: #fcd34d; background: #fffbeb; }
-.zone-card--alert { border-color: #fca5a5; background: #fef2f2; }
-.zone-card--selected { outline: 3px solid #15803d; }
-.zone-name { font-weight: 600; font-size: 0.9rem; }
-.zone-values { display: flex; gap: 0.75rem; font-size: 0.875rem; }
-.zone-date { font-size: 0.75rem; color: #9ca3af; }
-.chart-section { background: white; border: 1px solid #e5e7eb; border-radius: 12px; padding: 1.25rem; }
-h3 { margin: 0 0 1rem; font-size: 0.95rem; }
-.chart-hint { text-align: center; color: #9ca3af; font-size: 0.875rem; margin-top: 1rem; }
+
+.zone-card:hover {
+  transform: translateY(-2px);
+}
+
+.zone-card--ok {
+  border-color: #86efac;
+  background: #f0fdf4;
+}
+
+.zone-card--warn {
+  border-color: #fcd34d;
+  background: #fffbeb;
+}
+
+.zone-card--alert {
+  border-color: #fca5a5;
+  background: #fef2f2;
+}
+
+.zone-card--selected {
+  outline: 3px solid #15803d;
+}
+
+.zone-name {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.zone-values {
+  display: flex;
+  gap: 0.75rem;
+  font-size: 0.875rem;
+}
+
+.zone-date {
+  font-size: 0.75rem;
+  color: #9ca3af;
+}
+
+.chart-section {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 1.25rem;
+}
+
+h3 {
+  margin: 0 0 1rem;
+  font-size: 0.95rem;
+}
+
+.chart-hint {
+  text-align: center;
+  color: #9ca3af;
+  font-size: 0.875rem;
+  margin-top: 1rem;
+}
 </style>

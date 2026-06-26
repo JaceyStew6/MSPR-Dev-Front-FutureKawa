@@ -4,12 +4,12 @@ import { computed } from 'vue'
 const props = defineProps<{ status: string }>()
 
 const CONFIG: Record<string, { label: string; class: string }> = {
-  pending:   { label: 'En attente', class: 'badge--gray' },
-  stored:    { label: 'Stocké',     class: 'badge--blue' },
-  compliant: { label: 'Conforme',   class: 'badge--green' },
-  alert:     { label: 'Alerte',     class: 'badge--orange' },
-  blocked:   { label: 'Bloqué',     class: 'badge--red' },
-  shipped:   { label: 'Expédié',    class: 'badge--purple' },
+  pending:   { label: 'Pending',   class: 'badge--gray' },
+  stored:    { label: 'Stored',    class: 'badge--blue' },
+  compliant: { label: 'Compliant', class: 'badge--green' },
+  alert:     { label: 'Alert',     class: 'badge--orange' },
+  blocked:   { label: 'Blocked',   class: 'badge--red' },
+  shipped:   { label: 'Shipped',   class: 'badge--purple' },
 }
 
 const config = computed(() => {

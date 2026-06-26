@@ -12,21 +12,21 @@ const { unreadCount, alerts } = storeToRefs(alertsStore)
 const activeAlerts = computed(() => alerts.value.filter((a) => a.is_active && !a.is_read).slice(0, 5))
 
 const roleLabel: Record<string, string> = {
-  farm_manager: 'Responsable d\'exploitation',
-  warehouse_manager: 'Responsable d\'entrepôt',
-  quality: 'Équipe Qualité',
+  farm_manager: 'Farm Manager',
+  warehouse_manager: 'Warehouse Manager',
+  quality: 'Quality Team',
   supply_chain: 'Supply Chain',
-  hq: 'Siège / Direction',
+  hq: 'HQ / Management',
 }
 
 const quickLinks = computed(() => {
-  const base = [{ to: '/lots', label: 'Voir les lots' }, { to: '/alerts', label: 'Voir les alertes' }]
+  const base = [{ to: '/lots', label: 'View lots' }, { to: '/alerts', label: 'View alerts' }]
   const roleLinks: Record<string, { to: string; label: string }[]> = {
-    farm_manager: [{ to: '/farm/create-lot', label: 'Créer un lot' }, { to: '/farm', label: 'Mon exploitation' }],
-    warehouse_manager: [{ to: '/warehouse', label: 'Entrepôt' }, { to: '/monitoring', label: 'Monitoring' }],
-    quality: [{ to: '/quality', label: 'Qualité' }, { to: '/monitoring', label: 'Monitoring' }],
+    farm_manager: [{ to: '/farm/create-lot', label: 'Create a lot' }, { to: '/farm', label: 'My Farm' }],
+    warehouse_manager: [{ to: '/warehouse', label: 'Warehouse' }, { to: '/monitoring', label: 'Monitoring' }],
+    quality: [{ to: '/quality', label: 'Quality' }, { to: '/monitoring', label: 'Monitoring' }],
     supply_chain: [{ to: '/supply-chain', label: 'Supply Chain' }],
-    hq: [{ to: '/hq', label: 'Reporting global' }],
+    hq: [{ to: '/hq', label: 'Global reporting' }],
   }
   return [...base, ...(role.value ? (roleLinks[role.value] ?? []) : [])]
 })
@@ -35,7 +35,7 @@ const quickLinks = computed(() => {
 <template>
   <div class="dashboard">
     <div class="hero">
-      <h2>Bonjour, {{ user?.name }}</h2>
+      <h2>Hello, {{ user?.name }}</h2>
       <p class="role-label">{{ roleLabel[role ?? ''] ?? role }}</p>
     </div>
 
@@ -43,17 +43,17 @@ const quickLinks = computed(() => {
     <div class="cards">
       <div class="card card--alert">
         <div class="card-value">{{ unreadCount }}</div>
-        <div class="card-label">Alertes non lues</div>
+        <div class="card-label">Unread alerts</div>
       </div>
       <RouterLink to="/lots" class="card card--link">
         <div class="card-value">→</div>
-        <div class="card-label">Accéder aux lots</div>
+        <div class="card-label">View lots</div>
       </RouterLink>
     </div>
 
     <!-- Raccourcis -->
     <section class="quick-links">
-      <h3>Accès rapide</h3>
+      <h3>Quick access</h3>
       <div class="links-grid">
         <RouterLink v-for="link in quickLinks" :key="link.to" :to="link.to" class="quick-link">
           {{ link.label }}
@@ -63,15 +63,15 @@ const quickLinks = computed(() => {
 
     <!-- Dernières alertes actives -->
     <section v-if="activeAlerts.length" class="recent-alerts">
-      <h3>Alertes récentes</h3>
+      <h3>Recent alerts</h3>
       <ul>
         <li v-for="alert in activeAlerts" :key="alert.id" class="alert-item">
           <span class="alert-type" :class="`alert-type--${alert.type}`">{{ alert.type }}</span>
           {{ alert.message }}
-          <span class="alert-date">{{ new Date(alert.created_at).toLocaleDateString('fr-FR') }}</span>
+          <span class="alert-date">{{ new Date(alert.created_at).toLocaleDateString('en-US') }}</span>
         </li>
       </ul>
-      <RouterLink to="/alerts" class="see-all">Voir toutes les alertes →</RouterLink>
+      <RouterLink to="/alerts" class="see-all">View all alerts →</RouterLink>
     </section>
   </div>
 </template>

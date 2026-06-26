@@ -7,9 +7,9 @@ const totalPages = () => Math.ceil(props.total / props.limit)
 
 <template>
   <div v-if="total > limit" class="pagination">
-    <button :disabled="page <= 1" @click="emit('change', page - 1)">‹ Précédent</button>
+    <button :disabled="page <= 1" @click="emit('change', page - 1)">‹ Previous</button>
     <span>Page {{ page }} / {{ totalPages() }}</span>
-    <button :disabled="page >= totalPages()" @click="emit('change', page + 1)">Suivant ›</button>
+    <button :disabled="page >= totalPages()" @click="emit('change', page + 1)">Next ›</button>
   </div>
 </template>
 

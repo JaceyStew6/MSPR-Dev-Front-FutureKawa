@@ -36,7 +36,7 @@ async function handleLogout() {
       <!-- Warehouse Manager -->
       <template v-if="role === 'warehouse_manager'">
         <li>
-          <RouterLink to="/warehouse">Entrepôt</RouterLink>
+          <RouterLink to="/warehouse">Warehouse</RouterLink>
         </li>
         <li>
           <RouterLink to="/monitoring">Monitoring</RouterLink>
@@ -46,7 +46,7 @@ async function handleLogout() {
       <!-- HQ / Siège -->
       <template v-if="role === 'hq'">
         <li>
-          <RouterLink to="/quality">Qualité</RouterLink>
+          <RouterLink to="/quality">Quality</RouterLink>
         </li>
         <li>
           <RouterLink to="/supply-chain">Supply Chain</RouterLink>
@@ -62,7 +62,7 @@ async function handleLogout() {
     <div class="nav-right">
       <AlertBadge v-if="role === 'warehouse_manager'" />
       <span class="user-info">{{ user?.name }} · <em>{{ user?.role }}</em></span>
-      <button class="btn-logout" @click="handleLogout">Déconnexion</button>
+      <button class="btn-logout" @click="handleLogout">Log out</button>
     </div>
   </nav>
 </template>

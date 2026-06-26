@@ -24,33 +24,33 @@ async function fetchMovements() {
 onMounted(fetchMovements)
 
 const TYPE_LABEL: Record<string, string> = {
-  stock_in: 'Entrée',
-  stock_out: 'Sortie',
-  zone_transfer: 'Déplacement',
+  stock_in: 'In',
+  stock_out: 'Out',
+  zone_transfer: 'Transfer',
 }
 </script>
 
 <template>
   <div class="page">
-    <RouterLink to="/warehouse" class="back-link">← Retour entrepôt</RouterLink>
-    <h2>Historique des mouvements</h2>
+    <RouterLink to="/warehouse" class="back-link">← Back to warehouse</RouterLink>
+    <h2>Movement history</h2>
 
-    <div v-if="loading" class="loading">Chargement…</div>
+    <div v-if="loading" class="loading">Loading…</div>
 
     <table v-else class="movements-table">
       <thead>
         <tr>
           <th>Date</th>
           <th>Type</th>
-          <th>N° Lot</th>
-          <th>De / Vers</th>
-          <th>Raison</th>
-          <th>Opérateur</th>
+          <th>Lot No.</th>
+          <th>From / To</th>
+          <th>Reason</th>
+          <th>Operator</th>
         </tr>
       </thead>
       <tbody>
         <tr v-for="m in movements" :key="m.id">
-          <td>{{ new Date(m.performed_at).toLocaleString('fr-FR') }}</td>
+          <td>{{ new Date(m.performed_at).toLocaleString('en-US') }}</td>
           <td>
             <span class="type-badge" :class="`type--${m.type}`">{{ TYPE_LABEL[m.type] }}</span>
           </td>
@@ -64,7 +64,7 @@ const TYPE_LABEL: Record<string, string> = {
           <td>{{ m.performed_by ?? '-' }}</td>
         </tr>
         <tr v-if="movements.length === 0">
-          <td colspan="6" class="empty">Aucun mouvement</td>
+          <td colspan="6" class="empty">No movements</td>
         </tr>
       </tbody>
     </table>

@@ -11,8 +11,8 @@ import LotTable from '@/components/common/LotTable.vue'
 import { storeToRefs } from 'pinia'
 
 const STATUS_LABELS: Record<string, string> = {
-  pending: 'En attente', stored: 'Stocké', compliant: 'Conforme',
-  alert: 'Alerte', blocked: 'Bloqué', shipped: 'Expédié',
+  pending: 'Pending', stored: 'Stored', compliant: 'Compliant',
+  alert: 'Alert', blocked: 'Blocked', shipped: 'Shipped',
 }
 function statusLabel(s: string) { return STATUS_LABELS[s.toLowerCase()] ?? s }
 
@@ -76,11 +76,11 @@ async function doStockIn() {
   if (!stockInLotId.value || !stockInZoneId.value || !autoFilters.value.warehouse_ids?.[0] || !pays) return
   try {
     await lotsService.stockIn(stockInLotId.value, stockInZoneId.value, autoFilters.value.warehouse_ids[0], pays)
-    setMsg('Entrée enregistrée.')
+    setMsg('Stock-in recorded.')
     stockInLotId.value = ''; stockInZoneId.value = undefined
     fetchLots()
   } catch (e) {
-    setMsg(`Erreur entrée stock : ${e instanceof Error ? e.message : 'Échec'}`, true)
+    setMsg(`Stock-in error: ${e instanceof Error ? e.message : 'Failed'}`, true)
   }
 }
 
@@ -89,34 +89,34 @@ async function doStockOut() {
   if (!stockOutLotId.value || !pays) return
   try {
     await movementsService.stockOut({ lot_id: stockOutLotId.value, pays, type: 'shipment' })
-    setMsg('Sortie enregistrée.')
+    setMsg('Stock-out recorded.')
     stockOutLotId.value = null; stockOutReason.value = ''
     fetchLots()
   } catch (e) {
-    setMsg(`Erreur sortie stock : ${e instanceof Error ? e.message : 'Échec'}`, true)
+    setMsg(`Stock-out error: ${e instanceof Error ? e.message : 'Failed'}`, true)
   }
 }
 
 async function doTransfer() {
   const pays = autoFilters.value.country_id
   if (!transferLotId.value || !transferZoneId.value || !pays) {
-    setMsg('Erreur : pays non défini dans vos filtres.', true)
+    setMsg('Error: country not set in your filters.', true)
     return
   }
   try {
     await lotsService.updateZone(transferLotId.value, transferZoneId.value, pays)
-    setMsg('Lot déplacé.')
+    setMsg('Lot moved.')
     transferLotId.value = null; transferZoneId.value = undefined
     fetchLots()
   } catch (e) {
-    setMsg(`Erreur déplacement : ${e instanceof Error ? e.message : 'Échec'}`, true)
+    setMsg(`Move error: ${e instanceof Error ? e.message : 'Failed'}`, true)
   }
 }
 
 async function doStatusUpdate() {
   const pays = autoFilters.value.country_id
   if (!statusLotId.value || !newStatus.value || !pays) {
-    setMsg(!pays ? 'Erreur : pays non défini dans vos filtres.' : 'Veuillez sélectionner un lot et un statut.', true)
+    setMsg(!pays ? 'Error: country not set in your filters.' : 'Please select a lot and a status.', true)
     return
   }
   const id = statusLotId.value
@@ -126,10 +126,10 @@ async function doStatusUpdate() {
     saveStatusOverride(id, status)
     const lot = lots.value.find((l) => l.id === id)
     if (lot) lot.status = status
-    setMsg('Statut mis à jour.')
+    setMsg('Status updated.')
     statusLotId.value = null
   } catch (e) {
-    setMsg(`Erreur mise à jour statut : ${e instanceof Error ? e.message : 'Échec'}`, true)
+    setMsg(`Status update error: ${e instanceof Error ? e.message : 'Failed'}`, true)
   }
 }
 
@@ -139,8 +139,8 @@ onMounted(() => { fetchLots(); loadZones() })
 <template>
   <div class="page">
     <div class="page-header">
-      <h2>Gestion entrepôt</h2>
-      <RouterLink to="/warehouse/movements" class="btn-link">Historique mouvements →</RouterLink>
+      <h2>Warehouse management</h2>
+      <RouterLink to="/warehouse/movements" class="btn-link">Movement history →</RouterLink>
     </div>
 
     <p v-if="msg" :class="msgError ? 'error' : 'success'">{{ msg }}</p>
@@ -160,47 +160,47 @@ onMounted(() => { fetchLots(); loadZones() })
       <!-- Stock-out -->
       <!-- Endpoint problem for now - error 500 -->
       <div class="action-card">
-        <h3>Sortie de stock</h3>
+        <h3>Stock out</h3>
         <select v-model="stockOutLotId">
-          <option :value="null">- Sélectionner lot -</option>
+          <option :value="null">- Select lot -</option>
           <option v-for="l in lots" :key="l.id" :value="l.id">{{ l.batch_number }}</option>
         </select>
-        <input v-model="stockOutReason" placeholder="Motif" />
-        <button class="btn-danger" @click="doStockOut" :disabled="!stockOutLotId">Sortir le lot</button>
+        <input v-model="stockOutReason" placeholder="Reason" />
+        <button class="btn-danger" @click="doStockOut" :disabled="!stockOutLotId">Ship lot</button>
       </div>
 
       <!-- Zone transfer -->
       <div class="action-card">
-        <h3>Déplacer un lot</h3>
+        <h3>Move a lot</h3>
         <select v-model="transferLotId">
-          <option :value="null">- Sélectionner lot -</option>
+          <option :value="null">- Select lot -</option>
           <option v-for="l in lots" :key="l.id" :value="l.id">{{ l.batch_number }}</option>
         </select>
         <select v-model="transferZoneId">
-          <option :value="undefined">- Nouvelle zone -</option>
+          <option :value="undefined">- New zone -</option>
           <option v-for="z in zones" :key="z.id" :value="z.id">{{ z.name }}</option>
         </select>
-        <button @click="doTransfer" :disabled="!transferLotId || !transferZoneId">Déplacer</button>
+        <button @click="doTransfer" :disabled="!transferLotId || !transferZoneId">Move</button>
       </div>
 
       <!-- Status update -->
       <div class="action-card">
-        <h3>Mettre à jour statut</h3>
+        <h3>Update status</h3>
         <select v-model="statusLotId">
-          <option :value="null">- Sélectionner lot -</option>
+          <option :value="null">- Select lot -</option>
           <option v-for="l in lots" :key="l.id" :value="l.id">{{ l.batch_number }}</option>
         </select>
         <select v-model="newStatus">
-          <option value="">- Statut -</option>
+          <option value="">- Status -</option>
           <option v-for="s in availableStatuses" :key="s" :value="s">{{ statusLabel(s) }}</option>
         </select>
-        <button @click="doStatusUpdate" :disabled="!statusLotId || !newStatus">Mettre à jour</button>
+        <button @click="doStatusUpdate" :disabled="!statusLotId || !newStatus">Update</button>
       </div>
     </div>
 
     <!-- Liste lots triée FIFO -->
     <div class="section">
-      <h3>Lots en stock <span class="fifo-hint">(tri FIFO - plus anciens en premier)</span></h3>
+      <h3>Lots in stock <span class="fifo-hint">(FIFO – oldest first)</span></h3>
       <LotTable :lots="lots" :loading="loading" :show-zone="true" :show-readings="true" />
     </div>
   </div>

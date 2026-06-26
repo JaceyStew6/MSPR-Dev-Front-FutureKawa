@@ -9,8 +9,8 @@ import type { Lot } from '@/types/lot.types'
 import LotTable from '@/components/common/LotTable.vue'
 
 const STATUS_LABELS: Record<string, string> = {
-  pending: 'En attente', stored: 'Stocké', compliant: 'Conforme',
-  alert: 'Alerte', blocked: 'Bloqué', shipped: 'Expédié',
+  pending: 'Pending', stored: 'Stored', compliant: 'Compliant',
+  alert: 'Alert', blocked: 'Blocked', shipped: 'Shipped',
 }
 function statusLabel(s: string) { return STATUS_LABELS[s.toLowerCase()] ?? s }
 
@@ -53,18 +53,18 @@ async function doStatusUpdate() {
   const lot = lots.value.find((l) => l.id === id)
   const pays = lot?.country_id ?? autoFilters.value.country_id
   if (!pays) {
-    msg.value = 'Erreur : pays non déterminé pour ce lot.'
+    msg.value = 'Error: country could not be determined for this lot.'
     return
   }
   try {
     await lotsService.updateStatus(id, status, pays)
     saveStatusOverride(id, status)
     if (lot) lot.status = status
-    msg.value = `Statut mis à jour : ${statusLabel(status)}`
+    msg.value = `Status updated: ${statusLabel(status)}`
     msgError.value = false
     statusLotId.value = null
   } catch (e) {
-    msg.value = `Erreur : ${e instanceof Error ? e.message : 'Échec de la mise à jour'}`
+    msg.value = `Error: ${e instanceof Error ? e.message : 'Update failed'}`
     msgError.value = true
   }
 }
@@ -79,14 +79,14 @@ async function exportTraceability() {
       readingsService.getReadings({ lot_id: exportLotId.value, granularity: 'raw' }),
     ])
 
-    // Construire CSV
-    const header = 'Date,Température (°C),Humidité (%),Statut seuil'
+    // Build CSV
+    const header = 'Date,Temperature (°C),Humidity (%),Threshold status'
     const rows = readings.map((r) =>
-      `${new Date(r.recorded_at).toLocaleString('fr-FR')},${r.temperature},${r.humidity},${r.threshold_status}`
+      `${new Date(r.recorded_at).toLocaleString('en-US')},${r.temperature},${r.humidity},${r.threshold_status}`
     )
     const csv = [
-      `Rapport de traçabilité - Lot ${lot.batch_number}`,
-      `Exploitation: ${lot.farm_name} | Pays: ${lot.country_name} | Statut: ${lot.status}`,
+      `Traceability Report - Lot ${lot.batch_number}`,
+      `Farm: ${lot.farm_name} | Country: ${lot.country_name} | Status: ${lot.status}`,
       '',
       header,
       ...rows,
@@ -97,7 +97,7 @@ async function exportTraceability() {
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `tracabilite_${lot.batch_number}.csv`
+    a.download = `traceability_${lot.batch_number}.csv`
     a.click()
     URL.revokeObjectURL(url)
   } finally {
@@ -110,46 +110,46 @@ onMounted(fetchLots)
 
 <template>
   <div class="page">
-    <h2>Qualité</h2>
+    <h2>Quality</h2>
     <p v-if="msg" :class="msgError ? 'error' : 'success'">{{ msg }}</p>
 
     <div class="actions-grid">
-      <!-- Mise à jour statut (équipe qualité uniquement) -->
+      <!-- Status update (quality team only) -->
       <div v-if="role === 'quality'" class="action-card">
-        <h3>Mettre à jour le statut d'un lot</h3>
+        <h3>Update lot status</h3>
         <select v-model="statusLotId">
-          <option :value="null">- Sélectionner un lot -</option>
+          <option :value="null">- Select a lot -</option>
           <option v-for="l in lots" :key="l.id" :value="l.id">{{ l.batch_number }} ({{ l.status }})</option>
         </select>
         <select v-model="newStatus">
-          <option value="">- Statut -</option>
+          <option value="">- Status -</option>
           <option v-for="s in availableStatuses" :key="s" :value="s">{{ statusLabel(s) }}</option>
         </select>
-        <button @click="doStatusUpdate" :disabled="!statusLotId || !newStatus">Valider</button>
+        <button @click="doStatusUpdate" :disabled="!statusLotId || !newStatus">Confirm</button>
       </div>
 
-      <!-- Export tracabilité -->
+      <!-- Export traceability -->
       <div class="action-card">
-        <h3>📄 Exporter rapport de traçabilité</h3>
+        <h3>📄 Export traceability report</h3>
         <select v-model="exportLotId">
-          <option :value="null">- Sélectionner un lot -</option>
+          <option :value="null">- Select a lot -</option>
           <option v-for="l in lots" :key="l.id" :value="l.id">{{ l.batch_number }}</option>
         </select>
         <button @click="exportTraceability" :disabled="!exportLotId || exporting">
-          {{ exporting ? 'Génération…' : '⬇ Télécharger CSV' }}
+          {{ exporting ? 'Generating…' : '⬇ Download CSV' }}
         </button>
-        <small class="hint">Inclut toutes les mesures IoT + statuts du lot</small>
+        <small class="hint">Includes all IoT readings and lot statuses</small>
       </div>
     </div>
 
-    <!-- Lots avec alertes / non-conformités -->
+    <!-- Non-compliant / alert lots -->
     <div class="section">
-      <h3>Lots non conformes / en alerte</h3>
+      <h3>Non-compliant / alert lots</h3>
       <LotTable :lots="lots.filter(l => ['alert', 'blocked'].includes(l.status?.toLowerCase()))" :loading="loading" />
     </div>
 
     <div class="section">
-      <h3>Tous les lots</h3>
+      <h3>All lots</h3>
       <LotTable :lots="lots" :loading="loading" />
     </div>
   </div>

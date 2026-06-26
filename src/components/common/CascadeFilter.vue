@@ -71,7 +71,7 @@ function resetFilters() {
       @change="filtersStore.setCountry(($event.target as HTMLSelectElement).value || undefined)"
       :disabled="!!autoFilters.country_id"
     >
-      <option value="">- Tous les pays -</option>
+      <option value="">- All countries -</option>
       <option v-for="c in countries" :key="c.id" :value="c.id">{{ c.name }}</option>
     </select>
 
@@ -79,7 +79,7 @@ function resetFilters() {
       :value="farmId"
       @change="filtersStore.setFarm(($event.target as HTMLSelectElement).value || undefined)"
     >
-      <option value="">- Toutes les exploitations -</option>
+      <option value="">- All farms -</option>
       <option v-for="f in farms" :key="f.id" :value="f.id">{{ f.name }}</option>
     </select>
 
@@ -87,7 +87,7 @@ function resetFilters() {
       :value="warehouseId"
       @change="filtersStore.setWarehouse(($event.target as HTMLSelectElement).value || undefined)"
     >
-      <option value="">- Tous les entrepôts -</option>
+      <option value="">- All warehouses -</option>
       <option v-for="w in warehouses" :key="w.id" :value="w.id">{{ w.name }}</option>
     </select>
 
@@ -96,11 +96,11 @@ function resetFilters() {
       @change="filtersStore.setZone(($event.target as HTMLSelectElement).value || undefined)"
       :disabled="!warehouseId"
     >
-      <option value="">- Zone -</option>
+      <option value="">- All zones -</option>
       <option v-for="z in zones" :key="z.id" :value="z.id">{{ z.name }}</option>
     </select>
 
-    <button class="btn-reset" @click="resetFilters()">Réinitialiser</button>
+    <button class="btn-reset" @click="resetFilters()">Reset</button>
   </div>
 </template>
 

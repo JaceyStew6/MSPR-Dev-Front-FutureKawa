@@ -55,30 +55,30 @@ watch([typeFilter, activeOnly], () => { page.value = 1; fetchAlerts() })
 watch(page, fetchAlerts)
 
 const TYPE_LABEL: Record<AlertType, string> = {
-  threshold: 'Hors plage',
-  expiry: 'Expiration',
+  threshold: 'Out of range',
+  expiry: 'Expiry',
   fifo: 'FIFO',
 }
 </script>
 
 <template>
   <div class="page">
-    <h2>Alertes</h2>
+    <h2>Alerts</h2>
 
     <div class="filters-bar">
       <label class="checkbox-label">
         <input type="checkbox" v-model="activeOnly" />
-        Actives uniquement
+        Active only
       </label>
       <select v-model="typeFilter">
-        <option value="">- Tous types -</option>
-        <option value="threshold">Hors plage (température/humidité)</option>
-        <option value="expiry">Expiration (> 365 jours)</option>
-        <option value="fifo">FIFO à risque</option>
+        <option value="">- All types -</option>
+        <option value="threshold">Out of range (temperature/humidity)</option>
+        <option value="expiry">Expiry (&gt; 365 days)</option>
+        <option value="fifo">FIFO at risk</option>
       </select>
     </div>
 
-    <div v-if="loading" class="loading">Chargement…</div>
+    <div v-if="loading" class="loading">Loading…</div>
 
     <div v-else-if="fetchError" class="error-banner">{{ fetchError }}</div>
 
@@ -88,18 +88,19 @@ const TYPE_LABEL: Record<AlertType, string> = {
           <span class="alert-type" :class="`alert-type--${alert.type}`">
             {{ TYPE_LABEL[alert.type] }}
           </span>
-          <span v-if="alert.zone_name || alert.zone_id" class="alert-loc">Zone : {{ alert.zone_name ?? alert.zone_id }}</span>
+          <span v-if="alert.zone_name || alert.zone_id" class="alert-loc">Zone : {{ alert.zone_name ?? alert.zone_id
+            }}</span>
         </div>
         <p class="alert-message">{{ alert.message }}</p>
         <div class="alert-footer">
-          <span class="alert-date">{{ new Date(alert.created_at).toLocaleString('fr-FR') }}</span>
+          <span class="alert-date">{{ new Date(alert.created_at).toLocaleString('en-US') }}</span>
           <button v-if="!alert.is_read" class="btn-read" @click="markRead(alert.id)">
-            Marquer lu
+            Mark as read
           </button>
-          <span v-else class="read-label">✓ Lu</span>
+          <span v-else class="read-label">✓ Read</span>
         </div>
       </li>
-      <li v-if="alerts.length === 0" class="empty">Aucune alerte</li>
+      <li v-if="alerts.length === 0" class="empty">No alerts</li>
     </ul>
 
     <Pagination :page="page" :total="total" :limit="limit" @change="page = $event" />

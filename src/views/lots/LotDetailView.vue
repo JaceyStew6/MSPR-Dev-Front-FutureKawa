@@ -20,7 +20,7 @@ onMounted(async () => {
   try {
     lot.value = await lotsService.getLot(props.id, autoFilters.value.country_id)
   } catch {
-    error.value = 'Lot introuvable'
+    error.value = 'Lot not found'
   } finally {
     loading.value = false
   }
@@ -28,15 +28,15 @@ onMounted(async () => {
 
 function formatDate(d: string | undefined) {
   if (!d) return '-'
-  return new Date(d).toLocaleDateString('fr-FR')
+  return new Date(d).toLocaleDateString('en-US')
 }
 </script>
 
 <template>
   <div class="page">
-    <RouterLink to="/lots" class="back-link">← Retour aux lots</RouterLink>
+    <RouterLink to="/lots" class="back-link">← Back to lots</RouterLink>
 
-    <div v-if="loading" class="loading">Chargement…</div>
+    <div v-if="loading" class="loading">Loading…</div>
     <div v-else-if="error" class="error">{{ error }}</div>
 
     <template v-else-if="lot">
@@ -51,25 +51,25 @@ function formatDate(d: string | undefined) {
       <!-- Infos -->
       <div class="info-grid">
         <div class="info-block">
-          <h3>Informations</h3>
+          <h3>Information</h3>
           <table class="info-table">
-            <tr><td>Exploitation</td><td>{{ lot.farm_name ?? '-' }}</td></tr>
-            <tr><td>Pays</td><td>{{ lot.country_name ?? '-' }}</td></tr>
-            <tr><td>Entrepôt</td><td>{{ lot.warehouse_name ?? '-' }}</td></tr>
+            <tr><td>Farm</td><td>{{ lot.farm_name ?? '-' }}</td></tr>
+            <tr><td>Country</td><td>{{ lot.country_name ?? '-' }}</td></tr>
+            <tr><td>Warehouse</td><td>{{ lot.warehouse_name ?? '-' }}</td></tr>
             <tr><td>Zone</td><td>{{ lot.zone_name ?? '-' }}</td></tr>
-            <tr><td>Date de production</td><td>{{ formatDate(lot.production_date) }}</td></tr>
-            <tr><td>Date de stockage</td><td>{{ formatDate(lot.storage_date) }}</td></tr>
+            <tr><td>Production date</td><td>{{ formatDate(lot.production_date) }}</td></tr>
+            <tr><td>Storage date</td><td>{{ formatDate(lot.storage_date) }}</td></tr>
           </table>
         </div>
 
         <div class="info-block" v-if="lot.latest_reading">
-          <h3>Dernière mesure IoT</h3>
+          <h3>Latest IoT reading</h3>
           <div class="reading-card">
             <ThresholdDot :status="lot.latest_reading.threshold_status" :label="lot.latest_reading.threshold_status" />
             <div class="reading-values">
-              <div><span class="measure-label">Température</span> <strong>{{ lot.latest_reading.temperature.toFixed(1) }}°C</strong></div>
-              <div><span class="measure-label">Humidité</span> <strong>{{ lot.latest_reading.humidity.toFixed(0) }}%</strong></div>
-              <div class="measure-date">{{ new Date(lot.latest_reading.recorded_at).toLocaleString('fr-FR') }}</div>
+              <div><span class="measure-label">Temperature</span> <strong>{{ lot.latest_reading.temperature.toFixed(1) }}°C</strong></div>
+              <div><span class="measure-label">Humidity</span> <strong>{{ lot.latest_reading.humidity.toFixed(0) }}%</strong></div>
+              <div class="measure-date">{{ new Date(lot.latest_reading.recorded_at).toLocaleString('en-US') }}</div>
             </div>
           </div>
         </div>
@@ -77,7 +77,7 @@ function formatDate(d: string | undefined) {
 
       <!-- Courbes -->
       <div class="chart-section">
-        <h3>Historique température & humidité</h3>
+        <h3>Temperature & humidity history</h3>
         <ReadingChart :lot-id="lot.id" />
       </div>
     </template>

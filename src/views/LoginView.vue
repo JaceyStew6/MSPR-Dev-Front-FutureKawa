@@ -24,7 +24,7 @@ async function handleLogin() {
     const route = ROLE_DEFAULT_ROUTES[authStore.role!] || '/dashboard'
     router.push(route)
   } catch (e: unknown) {
-    error.value = e instanceof Error ? e.message : 'Identifiants invalides'
+    error.value = e instanceof Error ? e.message : 'Invalid credentials'
   } finally {
     loading.value = false
   }
@@ -35,17 +35,17 @@ async function handleLogin() {
   <div class="login-page">
     <div class="login-card">
       <h1>🌿 FutureKawa</h1>
-      <p class="subtitle">Gestion & traçabilité des lots de café</p>
+      <p class="subtitle">Coffee lot management & traceability</p>
 
       <form @submit.prevent="handleLogin" class="login-form">
         <div class="field">
           <label for="email">Email</label>
-          <input id="email" v-model="email" type="email" placeholder="vous@futurekawa.com" required
+          <input id="email" v-model="email" type="email" placeholder="you@futurekawa.com" required
             autocomplete="email" />
         </div>
 
         <div class="field">
-          <label for="password">Mot de passe</label>
+          <label for="password">Password</label>
           <input id="password" v-model="password" type="password" placeholder="••••••••" required
             autocomplete="current-password" />
         </div>
@@ -53,7 +53,7 @@ async function handleLogin() {
         <p v-if="error" class="error">{{ error }}</p>
 
         <button type="submit" class="btn-login" :disabled="loading">
-          {{ loading ? 'Connexion…' : 'Se connecter' }}
+          {{ loading ? 'Signing in…' : 'Sign in' }}
         </button>
       </form>
     </div>

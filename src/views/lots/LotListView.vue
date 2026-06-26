@@ -22,8 +22,8 @@ const loading = ref(false)
 const statusFilter = ref('')
 const availableStatuses = computed(() => [...new Set(lots.value.map((l) => l.status))])
 const STATUS_LABELS: Record<string, string> = {
-  pending: 'En attente', stored: 'Stocké', compliant: 'Conforme',
-  alert: 'Alerte', blocked: 'Bloqué', shipped: 'Expédié',
+  pending: 'Pending', stored: 'Stored', compliant: 'Compliant',
+  alert: 'Alert', blocked: 'Blocked', shipped: 'Shipped',
 }
 function statusLabel(s: string) { return STATUS_LABELS[s.toLowerCase()] ?? s }
 
@@ -56,16 +56,16 @@ watch(page, fetchLots)
 <template>
   <div class="page">
     <div class="page-header">
-      <h2>Lots de café</h2>
+      <h2>Coffee lots</h2>
       <RouterLink v-if="authStore.role === 'farm_manager'" to="/farm/create-lot" class="btn-primary">
-        + Créer un lot
+        + Create a lot
       </RouterLink>
     </div>
 
     <div class="filters-bar">
       <CascadeFilter />
       <select v-model="statusFilter" class="status-filter">
-        <option value="">- Tous les statuts -</option>
+        <option value="">- All statuses -</option>
         <option v-for="s in availableStatuses" :key="s" :value="s">{{ statusLabel(s) }}</option>
       </select>
     </div>

@@ -36,7 +36,7 @@ async function fetchAll() {
     // Répartition par statut
     const counts: Record<string, number> = {}
     for (const l of lotsRes.data) {
-      const s = l.status?.toLowerCase() ?? 'inconnu'
+      const s = l.status?.toLowerCase() ?? 'unknown'
       counts[s] = (counts[s] ?? 0) + 1
     }
     byStatus.value = counts
@@ -50,27 +50,27 @@ onMounted(fetchAll)
 
 <template>
   <div class="page">
-    <h2>Supply Chain - Vue consolidée</h2>
+    <h2>Supply Chain – Consolidated view</h2>
 
-    <!-- KPI rapides -->
+    <!-- Quick KPIs -->
     <div class="kpi-bar">
       <div class="kpi">
         <div class="kpi-val">{{ loading ? '…' : totalLots }}</div>
-        <div class="kpi-label">Lots totaux</div>
+        <div class="kpi-label">Total lots</div>
       </div>
       <div class="kpi kpi--warn">
         <div class="kpi-val">{{ loading ? '…' : fifoRiskLots.length }}</div>
-        <div class="kpi-label">FIFO à risque (&gt; 300 j)</div>
+        <div class="kpi-label">FIFO at risk (&gt; 300 days)</div>
       </div>
       <div class="kpi kpi--danger">
         <div class="kpi-val">{{ loading ? '…' : blockedLots.length }}</div>
-        <div class="kpi-label">Lots bloqués</div>
+        <div class="kpi-label">Blocked lots</div>
       </div>
     </div>
 
-    <!-- Répartition par statut -->
+    <!-- Status breakdown -->
     <div v-if="Object.keys(byStatus).length" class="section">
-      <h3>Répartition par statut</h3>
+      <h3>Status breakdown</h3>
       <div class="status-bar">
         <div v-for="(count, status) in byStatus" :key="status" class="status-seg">
           <StatusBadge :status="String(status)" />
@@ -79,21 +79,21 @@ onMounted(fetchAll)
       </div>
     </div>
 
-    <!-- FIFO à risque -->
+    <!-- FIFO at risk -->
     <div class="section">
-      <h3>Priorités FIFO - Lots stockés &gt; 300 jours</h3>
+      <h3>FIFO priorities – Lots stored &gt; 300 days</h3>
       <LotTable :lots="fifoRiskLots" :loading="loading" />
     </div>
 
-    <!-- Lots bloquant les expéditions -->
+    <!-- Lots blocking shipments -->
     <div class="section">
-      <h3>Lots bloquant les expéditions</h3>
+      <h3>Lots blocking shipments</h3>
       <LotTable :lots="blockedLots" :loading="loading" />
     </div>
 
-    <!-- Vue multi-pays -->
+    <!-- Multi-country view -->
     <div class="section">
-      <h3>Tous les lots (tri FIFO)</h3>
+      <h3>All lots (FIFO sort)</h3>
       <LotTable :lots="allLots" :loading="loading" />
     </div>
   </div>

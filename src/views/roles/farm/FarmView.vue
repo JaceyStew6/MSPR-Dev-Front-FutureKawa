@@ -42,7 +42,7 @@ async function handleStockOut() {
       pays: autoFilters.value.country_id,
       type: stockOutType.value,
     })
-    successMsg.value = 'Expédition enregistrée.'
+    successMsg.value = 'Shipment recorded.'
     stockOutLotId.value = null
     stockOutType.value = 'shipment'
     await fetchLots()
@@ -58,37 +58,35 @@ onMounted(fetchLots)
   <div class="page">
     <div class="page-header">
       <div>
-        <h2>Mon exploitation</h2>
+        <h2>My Farm</h2>
         <p class="sub">{{ user?.name }}</p>
       </div>
-      <RouterLink to="/farm/create-lot" class="btn-primary">+ Nouveau lot</RouterLink>
+      <RouterLink to="/farm/create-lot" class="btn-primary">+ New lot</RouterLink>
     </div>
 
-    <!-- Sortie rapide -->
     <div class="quick-action">
-      <h3>Enregistrer une expédition</h3>
+      <h3>Record a shipment</h3>
       <div class="form-row">
         <select v-model="stockOutLotId">
-          <option :value="null">- Sélectionner un lot -</option>
+          <option :value="null">- Select a lot -</option>
           <option v-for="lot in lots.filter(l => l.status !== 'shipped')" :key="lot.id" :value="lot.id">
             {{ lot.batch_number }} ({{ lot.status }})
           </option>
         </select>
         <select v-model="stockOutType">
-          <option value="shipment">Expédition client</option>
-          <option value="transfer">Transfert</option>
-          <option value="loss">Perte / destruction</option>
+          <option value="shipment">Customer shipment</option>
+          <option value="transfer">Transfer</option>
+          <option value="loss">Loss / disposal</option>
         </select>
         <button class="btn-danger" :disabled="!stockOutLotId || submitting" @click="handleStockOut">
-          {{ submitting ? 'Envoi…' : 'Expédier' }}
+          {{ submitting ? 'Sending…' : 'Ship' }}
         </button>
       </div>
       <p v-if="successMsg" class="success">{{ successMsg }}</p>
     </div>
 
-    <!-- Liste lots -->
     <div class="section">
-      <h3>Statut de l'exploitation</h3>
+      <h3>Farm status</h3>
       <LotTable :lots="lots" :loading="loading" :show-zone="false" :show-readings="false" />
     </div>
   </div>

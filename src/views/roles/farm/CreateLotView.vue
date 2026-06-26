@@ -28,7 +28,7 @@ onMounted(async () => {
 
 async function handleSubmit() {
   if (!selectedFarmId.value || !autoFilters.value.country_id) {
-    error.value = 'Veuillez sélectionner une exploitation'
+    error.value = 'Please select a farm'
     return
   }
   loading.value = true
@@ -43,7 +43,7 @@ async function handleSubmit() {
     })
     router.push('/farm')
   } catch (e: unknown) {
-    error.value = e instanceof Error ? e.message : 'Erreur lors de la création'
+    error.value = e instanceof Error ? e.message : 'Error during creation'
   } finally {
     loading.value = false
   }
@@ -52,46 +52,46 @@ async function handleSubmit() {
 
 <template>
   <div class="page">
-    <RouterLink to="/farm" class="back-link">← Retour à l'exploitation</RouterLink>
-    <h2>Créer un lot</h2>
+    <RouterLink to="/farm" class="back-link">← Back to farm</RouterLink>
+    <h2>Create a lot</h2>
 
     <form class="form" @submit.prevent="handleSubmit">
       <div class="field">
-        <label>Exploitation *</label>
+        <label>Farm *</label>
         <select v-model="selectedFarmId" required>
-          <option value="">- Sélectionner une exploitation -</option>
+          <option value="">- Select a farm -</option>
           <option v-for="f in farms" :key="f.id" :value="f.id">{{ f.name }}</option>
         </select>
       </div>
 
       <div class="field">
-        <label>Statut *</label>
+        <label>Status *</label>
         <select v-model="status" required>
-          <option value="pending">En attente</option>
-          <option value="stored">Stocké</option>
-          <option value="compliant">Conforme</option>
-          <option value="alert">Alerte</option>
-          <option value="blocked">Bloqué</option>
-          <option value="shipped">Expédié</option>
+          <option value="pending">Pending</option>
+          <option value="stored">Stored</option>
+          <option value="compliant">Compliant</option>
+          <option value="alert">Alert</option>
+          <option value="blocked">Blocked</option>
+          <option value="shipped">Shipped</option>
         </select>
       </div>
 
       <div class="field">
-        <label>Quantité *</label>
+        <label>Quantity *</label>
         <input type="number" v-model.number="quantite" min="0" required />
       </div>
 
       <div class="field">
-        <label>Caractéristique</label>
+        <label>Characteristic</label>
         <input type="number" v-model.number="caracteristique" min="0" />
       </div>
 
       <p v-if="error" class="error">{{ error }}</p>
 
       <div class="form-actions">
-        <RouterLink to="/farm" class="btn-cancel">Annuler</RouterLink>
+        <RouterLink to="/farm" class="btn-cancel">Cancel</RouterLink>
         <button type="submit" class="btn-submit" :disabled="loading">
-          {{ loading ? 'Création…' : 'Créer le lot' }}
+          {{ loading ? 'Creating…' : 'Create lot' }}
         </button>
       </div>
     </form>

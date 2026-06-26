@@ -67,53 +67,53 @@ function pct(n: number) {
 
 <template>
   <div class="page">
-    <h2>Reporting Global - Siège</h2>
+    <h2>Global Reporting – Headquarters</h2>
 
-    <!-- Sélection de la période -->
+    <!-- Date range -->
     <div class="date-range">
-      <label>Du <input type="date" v-model="fromDate" /></label>
-      <label>Au <input type="date" v-model="toDate" /></label>
-      <button @click="fetchReports">Actualiser</button>
+      <label>From <input type="date" v-model="fromDate" /></label>
+      <label>To <input type="date" v-model="toDate" /></label>
+      <button @click="fetchReports">Refresh</button>
     </div>
 
-    <div v-if="loading && !globalReport" class="loading">Chargement…</div>
+    <div v-if="loading && !globalReport" class="loading">Loading…</div>
 
     <template v-else-if="globalReport">
-      <!-- KPIs globaux -->
+      <!-- Global KPIs -->
       <div class="kpi-grid">
         <div class="kpi-card">
           <div class="kpi-val">{{ globalReport.kpis.total_lots }}</div>
-          <div class="kpi-label">Lots totaux</div>
+          <div class="kpi-label">Total lots</div>
         </div>
         <div class="kpi-card" :class="globalReport.kpis.compliance_rate >= 0.9 ? 'kpi--green' : 'kpi--orange'">
           <div class="kpi-val">{{ pct(globalReport.kpis.compliance_rate) }}</div>
-          <div class="kpi-label">Taux de conformité</div>
+          <div class="kpi-label">Compliance rate</div>
         </div>
         <div class="kpi-card" :class="activeAlertsCount > 10 ? 'kpi--red' : ''">
           <div class="kpi-val">{{ loading ? '…' : activeAlertsCount }}</div>
-          <div class="kpi-label">Alertes actives</div>
+          <div class="kpi-label">Active alerts</div>
         </div>
         <div class="kpi-card">
-          <div class="kpi-val">{{ Math.round(globalReport.kpis.avg_age_days) }}j</div>
-          <div class="kpi-label">Âge moyen des lots</div>
+          <div class="kpi-val">{{ Math.round(globalReport.kpis.avg_age_days) }}d</div>
+          <div class="kpi-label">Avg. lot age</div>
         </div>
         <div class="kpi-card">
           <div class="kpi-val">{{ globalReport.kpis.movements_last_30d }}</div>
-          <div class="kpi-label">Mouvements (30j)</div>
+          <div class="kpi-label">Movements (30d)</div>
         </div>
       </div>
 
-      <!-- Vue par pays -->
+      <!-- Country breakdown -->
       <div class="section">
-        <h3>Vue par pays</h3>
-        <div v-if="byCountry.length === 0" class="empty-msg">Aucune donnée disponible par pays.</div>
+        <h3>Country breakdown</h3>
+        <div v-if="byCountry.length === 0" class="empty-msg">No data available by country.</div>
         <table v-else class="country-table">
           <thead>
             <tr>
-              <th>Pays</th>
+              <th>Country</th>
               <th>Lots</th>
-              <th>Conformité</th>
-              <th>Alertes</th>
+              <th>Compliance</th>
+              <th>Alerts</th>
             </tr>
           </thead>
           <tbody>
