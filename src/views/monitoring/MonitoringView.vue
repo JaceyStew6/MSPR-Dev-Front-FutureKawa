@@ -97,7 +97,7 @@ function selectZone(id: string) {
       </div>
 
       <div v-if="selectedZoneId" class="chart-section">
-        <h3>History – Selected zone</h3>
+        <h3>History - Selected zone</h3>
         <ReadingChart :zone-id="selectedZoneId" :country-id="selectedCountryId" />
       </div>
       <p v-else class="chart-hint">Click on a zone to display its history</p>

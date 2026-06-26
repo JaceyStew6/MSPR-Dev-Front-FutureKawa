@@ -67,7 +67,7 @@ function pct(n: number) {
 
 <template>
   <div class="page">
-    <h2>Global Reporting – Headquarters</h2>
+    <h2>Global Reporting - Headquarters</h2>
 
     <!-- Date range -->
     <div class="date-range">
@@ -132,28 +132,140 @@ function pct(n: number) {
 </template>
 
 <style scoped>
-.page { padding: 2rem; max-width: 1100px; margin: 0 auto; }
-h2 { margin: 0 0 1.5rem; }
-h3 { margin: 0 0 0.75rem; font-size: 0.95rem; font-weight: 600; }
-.loading { text-align: center; padding: 2rem; color: #6b7280; }
-.empty-msg { color: #9ca3af; font-size: 0.875rem; padding: 0.5rem 0; }
-.kpi-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
-.kpi-card { background: white; border: 1px solid #e5e7eb; border-radius: 12px; padding: 1.25rem; text-align: center; }
-.kpi-val { font-size: 1.8rem; font-weight: 700; }
-.kpi-label { font-size: 0.78rem; color: #6b7280; margin-top: 4px; }
-.kpi--green { border-color: #86efac; }
-.kpi--green .kpi-val { color: #15803d; }
-.kpi--orange .kpi-val { color: #d97706; }
-.kpi--red .kpi-val { color: #dc2626; }
-.section { margin-bottom: 2.5rem; }
-.date-range { display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem; flex-wrap: wrap; margin-bottom: 1.75rem; }
-.date-range input { padding: 4px 8px; border: 1px solid #d1d5db; border-radius: 6px; }
-.date-range button { padding: 5px 12px; background: #1a2e1a; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.875rem; }
-.country-table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
-.country-table th { background: #f9fafb; padding: 9px 12px; text-align: left; font-weight: 600; border-bottom: 2px solid #e5e7eb; }
-.country-table td { padding: 9px 12px; border-bottom: 1px solid #f3f4f6; }
-.country-table tr:hover td { background: #f9fafb; }
-.good { color: #15803d; font-weight: 600; }
-.warn { color: #d97706; font-weight: 600; }
-.bad  { color: #dc2626; font-weight: 600; }
+.page {
+  padding: 2rem;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+h2 {
+  margin: 0 0 1.5rem;
+}
+
+h3 {
+  margin: 0 0 0.75rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.loading {
+  text-align: center;
+  padding: 2rem;
+  color: #6b7280;
+}
+
+.empty-msg {
+  color: #9ca3af;
+  font-size: 0.875rem;
+  padding: 0.5rem 0;
+}
+
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.kpi-card {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 1.25rem;
+  text-align: center;
+}
+
+.kpi-val {
+  font-size: 1.8rem;
+  font-weight: 700;
+}
+
+.kpi-label {
+  font-size: 0.78rem;
+  color: #6b7280;
+  margin-top: 4px;
+}
+
+.kpi--green {
+  border-color: #86efac;
+}
+
+.kpi--green .kpi-val {
+  color: #15803d;
+}
+
+.kpi--orange .kpi-val {
+  color: #d97706;
+}
+
+.kpi--red .kpi-val {
+  color: #dc2626;
+}
+
+.section {
+  margin-bottom: 2.5rem;
+}
+
+.date-range {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.75rem;
+}
+
+.date-range input {
+  padding: 4px 8px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+}
+
+.date-range button {
+  padding: 5px 12px;
+  background: #1a2e1a;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.875rem;
+}
+
+.country-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.country-table th {
+  background: #f9fafb;
+  padding: 9px 12px;
+  text-align: left;
+  font-weight: 600;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.country-table td {
+  padding: 9px 12px;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.country-table tr:hover td {
+  background: #f9fafb;
+}
+
+.good {
+  color: #15803d;
+  font-weight: 600;
+}
+
+.warn {
+  color: #d97706;
+  font-weight: 600;
+}
+
+.bad {
+  color: #dc2626;
+  font-weight: 600;
+}
 </style>

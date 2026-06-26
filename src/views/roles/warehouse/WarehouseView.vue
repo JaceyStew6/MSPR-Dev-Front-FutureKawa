@@ -200,7 +200,7 @@ onMounted(() => { fetchLots(); loadZones() })
 
     <!-- Liste lots triée FIFO -->
     <div class="section">
-      <h3>Lots in stock <span class="fifo-hint">(FIFO – oldest first)</span></h3>
+      <h3>Lots in stock <span class="fifo-hint">(FIFO - oldest first)</span></h3>
       <LotTable :lots="lots" :loading="loading" :show-zone="true" :show-readings="true" />
     </div>
   </div>

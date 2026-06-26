@@ -50,7 +50,7 @@ onMounted(fetchAll)
 
 <template>
   <div class="page">
-    <h2>Supply Chain – Consolidated view</h2>
+    <h2>Supply Chain - Consolidated view</h2>
 
     <!-- Quick KPIs -->
     <div class="kpi-bar">
@@ -81,7 +81,7 @@ onMounted(fetchAll)
 
     <!-- FIFO at risk -->
     <div class="section">
-      <h3>FIFO priorities – Lots stored &gt; 300 days</h3>
+      <h3>FIFO priorities - Lots stored &gt; 300 days</h3>
       <LotTable :lots="fifoRiskLots" :loading="loading" />
     </div>
 
@@ -145,8 +145,13 @@ h3 {
   margin-top: 0.25rem;
 }
 
-.kpi--warn .kpi-val { color: #d97706; }
-.kpi--danger .kpi-val { color: #dc2626; }
+.kpi--warn .kpi-val {
+  color: #d97706;
+}
+
+.kpi--danger .kpi-val {
+  color: #dc2626;
+}
 
 .section {
   margin-bottom: 2.5rem;

@@ -1,5 +1,5 @@
 import { api } from './api'
-import { geoService } from './geo.service'
+import { geoService, formatCountryName } from './geo.service'
 import { readingsService } from './readings.service'
 import { applyStatusOverrides, applyStatusOverride } from './status-overrides'
 import type { Lot, LotFilters, LotStatus, PaginatedResponse } from '@/types/lot.types'
@@ -64,9 +64,7 @@ async function enrichWithNames(lots: Lot[], country_id?: string): Promise<Lot[]>
   return lots.map((l) => {
     const warehouse = l.warehouse_id ? warehouseMap.get(l.warehouse_id) : undefined
     const lotCountry = warehouse?.country_id ?? country_id ?? l.country_id ?? ''
-    const countryName = lotCountry
-      ? lotCountry.charAt(0).toUpperCase() + lotCountry.slice(1).toLowerCase()
-      : l.country_name
+    const countryName = lotCountry ? formatCountryName(lotCountry) : l.country_name
 
     const farmMap = lotCountry ? farmMapByCountry.get(lotCountry) : undefined
 
