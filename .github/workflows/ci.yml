@@ -1,9 +1,7 @@
 # ─────────────────────────────────────────────────────────────────────────────
 # CI/CD - FutureKawa Frontend
 #
-# Pipeline: build ──► test ┐
-#                          ├──► sonar ──► deploy (main only)
-#                     lint ┘
+# Pipeline: build ──► test ──► e2e ──► sonar ──► deploy (main only)
 #
 # GitLab CI equivalences → GitHub Actions:
 #   stages                    → jobs with needs: to enforce order
@@ -103,7 +101,49 @@ jobs:
           retention-days: 1
 
 
-  # ── JOB 3 : SONARQUBE ANALYSIS ────────────────────────────────────────────────
+  # ── JOB 3 : E2E TESTS ────────────────────────────────────────────────────────
+  # GitLab: stage: test → e2e-job
+  # Runs after unit tests pass (needs: test).
+  # Uses VITE_MOCK=true via dev:e2e - no real backend required.
+  # Chromium only (playwright.config.ts: projects: [chromium]).
+  # Reports uploaded even on failure for debugging.
+  # ─────────────────────────────────────────────────────────────────────────────
+  e2e:
+    name: E2E tests (Playwright)
+    runs-on: self-hosted
+    needs: [test]
+
+    steps:
+      - name: Code checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: npm packages installation
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install chromium
+
+      - name: E2E tests
+        run: npm run test:e2e
+        env:
+          CI: true
+
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-${{ github.run_id }}
+          path: playwright-report/
+          retention-days: 7
+
+
+  # ── JOB 4 : SONARQUBE ANALYSIS ────────────────────────────────────────────────
   # GitLab: stage: sonar → build-sonar (tags: [local])
   # Waits for test to finish.
   # Self-hosted runner required: SonarQube runs on localhost:9000.
@@ -116,7 +156,7 @@ jobs:
   sonar:
     name: SonarQube Analysis
     runs-on: self-hosted
-    needs: [test]
+    needs: [e2e]
 
     steps:
       - name: Code checkout
