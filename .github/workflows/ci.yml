@@ -112,6 +112,7 @@ jobs:
     name: E2E tests (Playwright)
     runs-on: self-hosted
     needs: [test]
+    continue-on-error: true
 
     steps:
       - name: Code checkout
@@ -157,6 +158,7 @@ jobs:
     name: SonarQube Analysis
     runs-on: self-hosted
     needs: [e2e]
+    if: ${{ always() && !cancelled() }}
 
     steps:
       - name: Code checkout
@@ -228,8 +230,8 @@ jobs:
   deploy:
     name: Deployement
     runs-on: self-hosted
-    needs: sonar
-    if: github.ref_name == 'main' && github.event_name == 'push'
+    needs: [sonar, e2e]
+    if: github.ref_name == 'main' && github.event_name == 'push' && needs.sonar.result == 'success' && needs.e2e.result == 'success'
     environment: production
 
     steps:
