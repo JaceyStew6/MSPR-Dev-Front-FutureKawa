@@ -72,20 +72,30 @@ export async function mockFetch(url: string, options: RequestInit = {}): Promise
 
   // ── Géographie ────────────────────────────────────────────────────────────
 
+  // geo.service expects Record<string, BackendCountrySettings> keyed by uppercase country name
   if (method === 'GET' && path.startsWith('/countries')) {
-    return ok(COUNTRIES)
+    return ok({ COLOMBIE: {}, BRESIL: {}, EQUATEUR: {} })
   }
 
+  // geo.service calls GET /farms/{pays} (path param, not query param)
   if (method === 'GET' && path.startsWith('/farms')) {
-    const qs = parseQs(path)
-    const countryId = num(qs.country_id)
-    const farms = countryId ? FARMS.filter((f) => f.country_id === countryId) : FARMS
-    return ok(farms)
+    const pathParam = path.split('/')[2]?.split('?')[0]
+    let farms = [...FARMS]
+    if (pathParam) {
+      farms = farms.filter((f) => {
+        const c = COUNTRIES.find((c) => c.id === f.country_id)
+        return c?.name.toLowerCase() === pathParam.toLowerCase()
+      })
+    }
+    // Return BackendFarm format: { idExploitation, nom }
+    return ok(farms.map((f) => ({ idExploitation: String(f.id), nom: f.name })))
   }
 
   if (method === 'GET' && path.startsWith('/warehouses') && path.includes('/zones')) {
     const warehouseId = Number(path.split('/')[2])
-    return ok(ZONES[warehouseId] ?? [])
+    const zones = ZONES[warehouseId] ?? []
+    // Return BackendZone format: { idZone, nomZone, idEntrepot }
+    return ok(zones.map((z) => ({ idZone: String(z.id), nomZone: z.name, idEntrepot: String(z.warehouse_id) })))
   }
 
   if (method === 'GET' && path.startsWith('/warehouses') && path.includes('/readings/summary')) {
@@ -93,14 +103,26 @@ export async function mockFetch(url: string, options: RequestInit = {}): Promise
     return ok(WAREHOUSE_SUMMARIES[warehouseId] ?? { warehouse_id: warehouseId, zones: [] })
   }
 
+  // geo.service calls GET /warehouses/{pays} (path param) or GET /warehouses?country_id=&farm_id=
   if (method === 'GET' && path.startsWith('/warehouses')) {
     const qs = parseQs(path)
-    const countryId = num(qs.country_id)
-    const farmId = num(qs.farm_id)
+    const pathParam = path.split('/')[2]?.split('?')[0]
+    const countryFromPath = pathParam && isNaN(Number(pathParam)) ? pathParam : undefined
+    const countryIdFromQs = num(qs.country_id)
+    const farmIdFromQs = num(qs.farm_id)
+
     let warehouses = [...WAREHOUSES]
-    if (countryId) warehouses = warehouses.filter((w) => w.country_id === countryId)
-    if (farmId) warehouses = warehouses.filter((w) => w.farm_id === farmId)
-    return ok(warehouses)
+    if (countryFromPath) {
+      warehouses = warehouses.filter((w) => {
+        const c = COUNTRIES.find((c) => c.id === w.country_id)
+        return c?.name.toLowerCase() === countryFromPath.toLowerCase()
+      })
+    } else if (countryIdFromQs) {
+      warehouses = warehouses.filter((w) => w.country_id === countryIdFromQs)
+    }
+    if (farmIdFromQs) warehouses = warehouses.filter((w) => w.farm_id === farmIdFromQs)
+    // Return BackendWarehouse format: { idEntrepot, nom }
+    return ok(warehouses.map((w) => ({ idEntrepot: String(w.id), nom: w.name })))
   }
 
   // ── Zones readings latest ─────────────────────────────────────────────────
@@ -116,6 +138,18 @@ export async function mockFetch(url: string, options: RequestInit = {}): Promise
   }
 
   // ── Lots ──────────────────────────────────────────────────────────────────
+
+  // readingsService.getLatestReading calls GET /lot/{id}/mesures
+  if (method === 'GET' && path.match(/^\/lot\/[^/]+\/mesures$/)) {
+    const rawId = path.split('/')[2]
+    const id = parseInt(rawId)
+    const readings = isNaN(id) ? [] : (READINGS[id] ?? [])
+    return ok(readings.map((r) => ({
+      temperature: r.temperature,
+      humidite: (r as Record<string, unknown>).humidity as number,
+      dateMesure: (r as Record<string, unknown>).recorded_at as string,
+    })))
+  }
 
   // lotsService.getLot calls GET /lot/{id} (singular path)
   if (method === 'GET' && path.match(/^\/lot\/[^/?]+$/)) {

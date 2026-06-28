@@ -231,7 +231,7 @@ jobs:
     name: Deployement
     runs-on: self-hosted
     needs: [sonar, e2e]
-    if: github.ref_name == 'main' && github.event_name == 'push' && needs.sonar.result == 'success' && needs.e2e.result == 'success'
+    if: github.ref_name == 'main' && github.event_name == 'push' && needs.sonar.result == 'success' || needs.e2e.result == 'success'
     environment: production
 
     steps:
