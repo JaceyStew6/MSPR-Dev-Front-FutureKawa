@@ -190,7 +190,7 @@ test: {
     reporter: ['lcov', 'text', 'html'],
     reportsDirectory: './coverage',
     include: ['src/**/*.{ts,vue}'],
-    exclude: ['src/main.ts','src/App.vue', 'src/**/*.d.ts', 'src/assets/**'],
+    exclude: ['src/main.ts','src/App.vue', 'src/**/*.d.ts', 'src/assets/**''src/mocks/**'],
   },
 },
 ```
