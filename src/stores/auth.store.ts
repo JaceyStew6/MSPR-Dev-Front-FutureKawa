@@ -5,14 +5,37 @@ import { geoService } from '@/services/geo.service'
 import { setToken, setUnauthorizedHandler } from '@/services/api'
 import type { User, UserRole, LoginPayload } from '@/types/user.types'
 
+const STORAGE_KEY = 'fk_session'
+
+function saveSession(tok: string, u: User) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify({ token: tok, user: u }))
+}
+
+function clearSession() {
+  localStorage.removeItem(STORAGE_KEY)
+}
+
+function loadSession(): { token: string; user: User } | null {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY)
+    return raw ? JSON.parse(raw) : null
+  } catch {
+    return null
+  }
+}
+
 export const useAuthStore = defineStore('auth', () => {
-  const user = ref<User | null>(null)
-  const token = ref<string | null>(null)
+  // Restore from localStorage so the session survives page reloads
+  const saved = loadSession()
+
+  const user = ref<User | null>(saved?.user ?? null)
+  const token = ref<string | null>(saved?.token ?? null)
+
+  if (saved?.token) setToken(saved.token)
 
   const isAuthenticated = computed(() => !!token.value)
   const role = computed<UserRole | null>(() => user.value?.role ?? null)
 
-  // Filtres automatiques selon le rôle de l'utilisateur
   const autoFilters = computed(() => ({
     country_id: user.value?.country_id,
     farm_id: user.value?.farm_id,
@@ -49,17 +72,19 @@ export const useAuthStore = defineStore('auth', () => {
     token.value = res.token
     user.value = await enrich(res.user)
     setToken(res.token)
+    saveSession(res.token, user.value)
   }
 
   async function logout() {
     try {
       await authService.logout()
     } catch {
-      // ignorer erreur réseau au logout
+      // ignore network errors on logout
     } finally {
       token.value = null
       user.value = null
       setToken(null)
+      clearSession()
     }
   }
 
@@ -69,7 +94,6 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   function init() {
-    // Enregistre le handler 401 pour logout automatique
     setUnauthorizedHandler(() => logout())
   }
 

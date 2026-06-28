@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { createPinia, setActivePinia } from 'pinia'
+import type { UserRole } from '@/types/user.types'
 import router from './index'
 
 vi.mock('@/stores/auth.store', () => ({
@@ -10,12 +11,16 @@ import { useAuthStore } from '@/stores/auth.store'
 
 const mockUseAuthStore = vi.mocked(useAuthStore)
 
-function mockAuth(isAuthenticated: boolean, role: string | null = null) {
+function mockAuth(isAuthenticated: boolean, role: UserRole | null = null) {
   mockUseAuthStore.mockReturnValue({
     isAuthenticated,
     role,
-    autoFilters: {},
-  } as never)
+    autoFilters: {
+      country_id: undefined,
+      farm_id: undefined,
+      warehouse_ids: undefined,
+    },
+  } as unknown as ReturnType<typeof useAuthStore>)
 }
 
 beforeEach(async () => {
@@ -25,7 +30,7 @@ beforeEach(async () => {
   await router.push('/login')
 })
 
-describe('Router — navigation guard', () => {
+describe('Router - navigation guard', () => {
   describe('unauthenticated access', () => {
     it('redirects to /login when accessing a protected route without a session', async () => {
       // Arrange
@@ -52,7 +57,7 @@ describe('Router — navigation guard', () => {
 
   describe('authenticated access to /login', () => {
     it('redirects to /dashboard when an authenticated user visits /login', async () => {
-      // Arrange — start from /dashboard so the push to /login is not a duplicate
+      // Arrange - start from /dashboard so the push to /login is not a duplicate
       mockAuth(true, 'farm_manager')
       await router.push('/dashboard')
 

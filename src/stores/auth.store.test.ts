@@ -46,6 +46,7 @@ const makeUser = (overrides = {}) => ({
 })
 
 beforeEach(() => {
+  localStorage.clear()
   setActivePinia(createPinia())
   vi.clearAllMocks()
 })

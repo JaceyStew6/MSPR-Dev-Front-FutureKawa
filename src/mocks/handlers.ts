@@ -117,6 +117,23 @@ export async function mockFetch(url: string, options: RequestInit = {}): Promise
 
   // ── Lots ──────────────────────────────────────────────────────────────────
 
+  // lotsService.getLot calls GET /lot/{id} (singular path)
+  if (method === 'GET' && path.match(/^\/lot\/[^/?]+$/)) {
+    const rawId = path.split('/')[2]
+    const id = parseInt(rawId)
+    const lot = isNaN(id) ? undefined : LOTS.find((l) => l.id === id)
+    if (!lot) return new Response(JSON.stringify({ message: 'Lot introuvable' }), { status: 404 })
+    return ok({
+      idLot: String(lot.id),
+      status: lot.status,
+      idExploitation: lot.farm_id != null ? String(lot.farm_id) : undefined,
+      idEntrepot: lot.warehouse_id != null ? String(lot.warehouse_id) : undefined,
+      emplacement: lot.zone_id != null ? String(lot.zone_id) : undefined,
+      dateProduction: lot.production_date,
+      dateStockage: lot.storage_date,
+    })
+  }
+
   if (method === 'GET' && path.match(/^\/lots\/\d+$/)) {
     const id = Number(path.split('/')[2])
     const lot = LOTS.find((l) => l.id === id)
@@ -136,7 +153,16 @@ export async function mockFetch(url: string, options: RequestInit = {}): Promise
     if (!qs.sort || qs.sort === 'storage_date_asc') {
       lots.sort((a, b) => new Date(a.storage_date ?? '').getTime() - new Date(b.storage_date ?? '').getTime())
     }
-    return ok(paginate(lots, num(qs.page) ?? 1, num(qs.limit) ?? 20))
+    // lotsService.getLots expects a flat BackendLot[] - it does its own in-memory pagination
+    return ok(lots.map((l) => ({
+      idLot: String(l.id),
+      status: l.status,
+      idExploitation: l.farm_id != null ? String(l.farm_id) : undefined,
+      idEntrepot: l.warehouse_id != null ? String(l.warehouse_id) : undefined,
+      emplacement: l.zone_id != null ? String(l.zone_id) : undefined,
+      dateProduction: l.production_date,
+      dateStockage: l.storage_date,
+    })))
   }
 
   if (method === 'POST' && path === '/lots') {
