@@ -2,8 +2,9 @@
 import type { UserRole } from '@/types/user.types'
 
 export const ROLE_DEFAULT_ROUTES: Record<UserRole, string> = {
+    admin: '/dashboard',
     farm_manager: '/farm',
-    warehouse_manager: '/home',
+    warehouse_manager: '/warehouse',
     quality: '/quality',
     supply_chain: '/supply-chain',
     hq: '/hq'

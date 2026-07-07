@@ -69,6 +69,9 @@ router.beforeEach((to) => {
     return '/login'
   }
 
+  // Admins bypass per-role restrictions and can reach every route.
+  if (auth.role === 'admin') return true
+
   const role = auth.role
   for (const [pattern, allowedRoles] of Object.entries(ROLE_ACCESS)) {
     if (pathMatchesPattern(to.path, pattern)) {

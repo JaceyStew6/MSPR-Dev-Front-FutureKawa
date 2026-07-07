@@ -5,6 +5,14 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install
 COPY . .
+
+# .env is gitignored (never committed) and Vite only reads VITE_* vars at
+# build time, so provide safe defaults here, overridable with --build-arg.
+ARG VITE_API_BASE_URL=/api-siege
+ARG VITE_MOCK=false
+ENV VITE_API_BASE_URL=${VITE_API_BASE_URL}
+ENV VITE_MOCK=${VITE_MOCK}
+
 RUN npm run build-only
 
 # Stage 2 - Serve (nginx)

@@ -68,24 +68,19 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   async function login(payload: LoginPayload) {
-    const res = await authService.login(payload)
-    token.value = res.token
-    user.value = await enrich(res.user)
-    setToken(res.token)
-    saveSession(res.token, user.value)
+    const { token: tok } = await authService.login(payload)
+    setToken(tok)
+    token.value = tok
+    user.value = await enrich(await authService.me())
+    saveSession(tok, user.value)
   }
 
-  async function logout() {
-    try {
-      await authService.logout()
-    } catch {
-      // ignore network errors on logout
-    } finally {
-      token.value = null
-      user.value = null
-      setToken(null)
-      clearSession()
-    }
+  function logout() {
+    // Stateless JWT: nothing to invalidate server-side, just drop the local session.
+    token.value = null
+    user.value = null
+    setToken(null)
+    clearSession()
   }
 
   async function fetchMe() {

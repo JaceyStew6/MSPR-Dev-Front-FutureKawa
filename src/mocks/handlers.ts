@@ -47,27 +47,31 @@ export async function mockFetch(url: string, options: RequestInit = {}): Promise
 
   // ── Auth ──────────────────────────────────────────────────────────────────
 
-  if (method === 'POST' && path === '/auth/login') {
+  // Mirrors the real backend contract: AuthController is mounted at /api/auth
+  // (unlike the rest of the API, which sits at the root). POST /api/auth/login
+  // only ever returns a token (AuthResponseDTO), and GET /api/auth/me returns
+  // { id, email, roles, countryId } (MeResponseDTO) - there is no
+  // POST /api/auth/logout (stateless JWT).
+
+  if (method === 'POST' && path === '/api/auth/login') {
     const user = USERS.find((u) => u.email === body?.email && u.password === body?.password)
     if (!user) {
       return new Response(JSON.stringify({ message: 'Email ou mot de passe incorrect' }), { status: 401 })
     }
     currentUserId = user.id
-    const { password: _, ...safeUser } = user
-    return ok({ token: `mock-token-${user.id}`, user: safeUser })
+    return ok({ token: `mock-token-${user.id}` })
   }
 
-  if (method === 'POST' && path === '/auth/logout') {
-    currentUserId = null
-    return new Response(null, { status: 204 })
-  }
-
-  if (method === 'GET' && path === '/auth/me') {
+  if (method === 'GET' && path === '/api/auth/me') {
     if (!currentUserId) return new Response(null, { status: 401 })
     const user = USERS.find((u) => u.id === currentUserId)
     if (!user) return new Response(null, { status: 401 })
-    const { password: _, ...safeUser } = user
-    return ok(safeUser)
+    return ok({
+      id: user.id,
+      email: user.email,
+      roles: user.roles,
+      countryId: user.country_id ?? null,
+    })
   }
 
   // ── Géographie ────────────────────────────────────────────────────────────

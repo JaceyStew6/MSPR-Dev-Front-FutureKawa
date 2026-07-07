@@ -46,13 +46,15 @@ export const ZONES: Record<number, { id: number; name: string; warehouse_id: num
 // country_id doit correspondre exactement aux clés retournées par GET /countries
 // warehouse_ids doit contenir de vrais UUIDs du backend (GET /warehouses/{pays})
 
+// roles uses the backend's Role enum values (com.backendSiege.domain.model.Role)
+// so the mock /auth/me handler can return the same shape as the real backend.
 export const USERS = [
   {
     id: 'mock-farm-1',
     email: 'farm@futurekawa.com',
     password: 'test',
     name: 'Carlos Mendez',
-    role: 'farm_manager',
+    roles: ['ROLE_OPERATION_MANAGER'],
     country_id: 'colombie',   // adapter à la clé exacte de /countries
     farm_id: undefined,       // remplacer par un vrai UUID de /farms/colombie
     warehouse_ids: undefined, // remplacer par de vrais UUIDs de /warehouses/colombie
@@ -62,7 +64,7 @@ export const USERS = [
     email: 'warehouse@futurekawa.com',
     password: 'test',
     name: 'Sophie Martin',
-    role: 'warehouse_manager',
+    roles: ['ROLE_WAREHOUSE_MANAGER'],
     country_id: 'colombie',  // doit correspondre au format exact attendu par le backend (pays=...)
     farm_id: undefined,
     warehouse_ids: undefined, // rempli dynamiquement après login via GET /warehouses/{pays}
@@ -72,7 +74,7 @@ export const USERS = [
     email: 'quality@futurekawa.com',
     password: 'test',
     name: 'Aïsha Koné',
-    role: 'quality',
+    roles: ['ROLE_QUALITY'],
     country_id: undefined,
     farm_id: undefined,
     warehouse_ids: undefined,
@@ -82,7 +84,7 @@ export const USERS = [
     email: 'supply@futurekawa.com',
     password: 'test',
     name: 'Thomas Legrand',
-    role: 'supply_chain',
+    roles: ['ROLE_SUPPLY_CHAIN'],
     country_id: undefined,
     farm_id: undefined,
     warehouse_ids: undefined,
@@ -92,7 +94,17 @@ export const USERS = [
     email: 'hq@futurekawa.com',
     password: 'test',
     name: 'Marie Dupont',
-    role: 'hq',
+    roles: ['ROLE_HEADQUARTER'],
+    country_id: undefined,
+    farm_id: undefined,
+    warehouse_ids: undefined,
+  },
+  {
+    id: 'mock-admin-1',
+    email: 'admin@futurekawa.com',
+    password: 'test',
+    name: 'Admin FutureKawa',
+    roles: ['ROLE_ADMIN'],
     country_id: undefined,
     farm_id: undefined,
     warehouse_ids: undefined,

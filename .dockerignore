@@ -3,6 +3,5 @@ npm-debug.log
 dist
 .git
 .gitignore
-.env
 .vscode
 **/*.md

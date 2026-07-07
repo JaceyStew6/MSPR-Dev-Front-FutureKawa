@@ -31,10 +31,13 @@ async function handleLogout() {
     <div class="nav-brand" v-if="role === 'hq'">
       <RouterLink to="/hq" class="brand-link">🌿 FutureKawa</RouterLink>
     </div>
+    <div class="nav-brand" v-if="role === 'admin'">
+      <RouterLink to="/dashboard" class="brand-link">🌿 FutureKawa</RouterLink>
+    </div>
 
     <ul class="nav-links">
       <!-- Warehouse Manager -->
-      <template v-if="role === 'warehouse_manager'">
+      <template v-if="role === 'warehouse_manager' || role === 'admin'">
         <li>
           <RouterLink to="/warehouse">Warehouse</RouterLink>
         </li>
@@ -44,7 +47,7 @@ async function handleLogout() {
       </template>
 
       <!-- HQ / Siège -->
-      <template v-if="role === 'hq'">
+      <template v-if="role === 'hq' || role === 'admin'">
         <li>
           <RouterLink to="/quality">Quality</RouterLink>
         </li>
@@ -52,15 +55,24 @@ async function handleLogout() {
           <RouterLink to="/supply-chain">Supply Chain</RouterLink>
         </li>
       </template>
+
+      <!-- Admin also reaches the farm manager area -->
+      <li v-if="role === 'admin'">
+        <RouterLink to="/farm">Farm</RouterLink>
+      </li>
+
       <li>
-        <RouterLink to="/lots" v-if="role === 'quality' || role === 'warehouse_manager' || role === 'supply_chain'">
+        <RouterLink
+          to="/lots"
+          v-if="role === 'quality' || role === 'warehouse_manager' || role === 'supply_chain' || role === 'admin'"
+        >
           Lots
         </RouterLink>
       </li>
     </ul>
 
     <div class="nav-right">
-      <AlertBadge v-if="role === 'warehouse_manager'" />
+      <AlertBadge v-if="role === 'warehouse_manager' || role === 'admin'" />
       <a href="/user-guide.pdf" target="_blank" rel="noopener" class="btn-help" title="User guide">
         ? Help
       </a>
