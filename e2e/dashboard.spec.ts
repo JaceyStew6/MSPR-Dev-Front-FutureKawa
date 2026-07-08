@@ -5,7 +5,7 @@ test.describe('Dashboard', () => {
     await loginAs('hq')
     await page.goto('/dashboard')
 
-    await expect(page.locator('h2')).toContainText('Hello, Marie Dupont')
+    await expect(page.locator('h2')).toContainText('Hello, hq')
   })
 
   test('shows the correct role label for HQ user', async ({ page, loginAs }) => {
