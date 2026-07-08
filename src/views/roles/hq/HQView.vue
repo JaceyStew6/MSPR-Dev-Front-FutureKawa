@@ -86,7 +86,7 @@ function pct(n: number) {
           <div class="kpi-label">Total lots</div>
         </div>
         <div class="kpi-card" :class="globalReport.kpis.compliance_rate >= 0.9 ? 'kpi--green' : 'kpi--orange'">
-          <div class="kpi-val">{{ pct(globalReport.kpis.compliance_rate) }}</div>
+          <div class="kpi-val">{{ globalReport.kpis.compliance_rate }}%</div>
           <div class="kpi-label">Compliance rate</div>
         </div>
         <div class="kpi-card" :class="activeAlertsCount > 10 ? 'kpi--red' : ''">
@@ -120,7 +120,7 @@ function pct(n: number) {
             <tr v-for="c in byCountry" :key="c.country_id">
               <td>{{ c.country_name }}</td>
               <td>{{ c.total_lots }}</td>
-              <td :class="c.compliance_rate >= 0.9 ? 'good' : 'warn'">{{ pct(c.compliance_rate) }}</td>
+              <td :class="c.compliance_rate >= 0.9 ? 'good' : 'warn'">{{ c.compliance_rate }}%</td>
               <td :class="c.active_alerts > 5 ? 'bad' : ''">{{ c.active_alerts }}</td>
             </tr>
           </tbody>
