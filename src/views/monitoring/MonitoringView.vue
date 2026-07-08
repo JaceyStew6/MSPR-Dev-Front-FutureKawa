@@ -26,7 +26,7 @@ const selectedCountryId = computed(
 async function loadWarehouses() {
   warehouses.value = await geoService.getWarehouses()
   if (warehouseId.value) selectedWarehouseId.value = warehouseId.value
-  else if (warehouses.value.length) selectedWarehouseId.value = warehouses.value[0].id
+  else selectedWarehouseId.value = warehouses.value[0]?.id
   if (selectedWarehouseId.value) loadSummary()
 }
 

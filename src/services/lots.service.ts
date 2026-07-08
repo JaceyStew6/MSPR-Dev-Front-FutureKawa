@@ -141,6 +141,7 @@ export const lotsService = {
       enrichWithNames([lot], country_id),
       readingsService.getLatestReading(id),
     ])
+    if (!enriched) throw new Error('Lot introuvable')
     const withOverride = applyStatusOverride(enriched)
     if (!reading) return withOverride
     return {

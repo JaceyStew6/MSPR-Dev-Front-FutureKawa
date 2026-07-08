@@ -57,7 +57,8 @@ export const useAuthStore = defineStore('auth', () => {
     if (u.role !== 'farm_manager' || !u.country_id || u.farm_id) return u
     try {
       const farms = await geoService.getFarms(u.country_id)
-      return farms.length ? { ...u, farm_id: farms[0].id } : u
+      const [firstFarm] = farms
+      return firstFarm ? { ...u, farm_id: firstFarm.id } : u
     } catch {
       return u
     }

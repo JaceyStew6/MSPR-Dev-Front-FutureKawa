@@ -146,7 +146,7 @@ export async function mockFetch(url: string, options: RequestInit = {}): Promise
   // readingsService.getLatestReading calls GET /lot/{id}/mesures
   if (method === 'GET' && path.match(/^\/lot\/[^/]+\/mesures$/)) {
     const rawId = path.split('/')[2]
-    const id = parseInt(rawId)
+    const id = parseInt(rawId ?? '')
     const readings = isNaN(id) ? [] : (READINGS[id] ?? [])
     return ok(readings.map((r) => ({
       temperature: r.temperature,
@@ -158,7 +158,7 @@ export async function mockFetch(url: string, options: RequestInit = {}): Promise
   // lotsService.getLot calls GET /lot/{id} (singular path)
   if (method === 'GET' && path.match(/^\/lot\/[^/?]+$/)) {
     const rawId = path.split('/')[2]
-    const id = parseInt(rawId)
+    const id = parseInt(rawId ?? '')
     const lot = isNaN(id) ? undefined : LOTS.find((l) => l.id === id)
     if (!lot) return new Response(JSON.stringify({ message: 'Lot introuvable' }), { status: 404 })
     return ok({
@@ -237,7 +237,7 @@ export async function mockFetch(url: string, options: RequestInit = {}): Promise
     if (!lot) return new Response(JSON.stringify({ message: 'Lot introuvable' }), { status: 404 })
     const zone = Object.values(ZONES).flat().find((z) => String(z.id) === String(body.idZone))
     lot.zone_id = body.idZone
-    lot.zone_name = zone?.name
+    lot.zone_name = zone?.name ?? lot.zone_name
     return ok({ idLot: String(lot.id), status: lot.status })
   }
 
@@ -270,8 +270,9 @@ export async function mockFetch(url: string, options: RequestInit = {}): Promise
     const qs = parseQs(path)
     let filtered = [...ALERTS]
     // Filtre par pays (insensible à la casse, compare au country_name du mock)
-    if (qs.pays) filtered = filtered.filter((a) =>
-      (a as Record<string, unknown>).country_name?.toString().toLowerCase() === qs.pays.toLowerCase()
+    const pays = qs.pays
+    if (pays) filtered = filtered.filter((a) =>
+      (a as Record<string, unknown>).country_name?.toString().toLowerCase() === pays.toLowerCase()
     )
     // Filtre par idEntrepot (UUID réel en prod, ID numérique en mock)
     if (qs.idEntrepot) filtered = filtered.filter((a) =>
@@ -303,7 +304,7 @@ export async function mockFetch(url: string, options: RequestInit = {}): Promise
     const lot = LOTS.find((l) => l.id === body.lot_id)
     const zone = Object.values(ZONES).flat().find((z) => z.id === body.zone_id)
     const warehouse = WAREHOUSES.find((w) => w.id === body.warehouse_id)
-    if (lot) { lot.status = 'stored'; lot.warehouse_id = body.warehouse_id; lot.zone_id = body.zone_id; lot.zone_name = zone?.name; lot.storage_date = new Date().toISOString() }
+    if (lot) { lot.status = 'stored'; lot.warehouse_id = body.warehouse_id; lot.zone_id = body.zone_id; lot.zone_name = zone?.name ?? lot.zone_name; lot.storage_date = new Date().toISOString() }
     const mv = {
       id: newId, lot_id: body.lot_id, lot_batch_number: lot?.batch_number,
       type: 'stock_in', from_zone_id: null, from_zone_name: null,
